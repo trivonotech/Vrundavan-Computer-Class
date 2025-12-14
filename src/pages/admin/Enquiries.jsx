@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { MessageSquare, Clock, Mail, User, Trash2, Loader2, Phone } from 'lucide-react';
+import { MessageSquare, Clock, Mail, User, Trash2, Loader2, Phone, AlertTriangle } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const Enquiries = () => {
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     useEffect(() => {
         const q = query(collection(db, "enquiries"), orderBy("createdAt", "desc"));
@@ -21,10 +23,15 @@ const Enquiries = () => {
         return () => unsubscribe();
     }, []);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this enquiry?")) return;
+    const handleDelete = (id) => {
+        setDeleteTarget(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await deleteDoc(doc(db, "enquiries", id));
+            await deleteDoc(doc(db, "enquiries", deleteTarget));
+            setDeleteTarget(null);
         } catch (error) {
             console.error("Error deleting enquiry:", error);
         }
@@ -102,7 +109,41 @@ const Enquiries = () => {
                     </div>
                 )}
             </div>
-        </div>
+
+
+            {/* Delete Confirmation Modal */}
+            {
+                deleteTarget && (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col items-center text-center space-y-4">
+                                <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2">
+                                    <AlertTriangle size={32} />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900">Delete Enquiry?</h3>
+                                <p className="text-slate-500">
+                                    This action cannot be undone. This message will be permanently removed.
+                                </p>
+                                <div className="flex w-full gap-3 pt-4">
+                                    <button
+                                        onClick={() => setDeleteTarget(null)}
+                                        className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmDelete}
+                                        className="flex-1 px-4 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-shadow shadow-md hover:shadow-lg"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 };
 

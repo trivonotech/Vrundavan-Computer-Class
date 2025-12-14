@@ -24,11 +24,13 @@ const AdminStats = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
+                // Fetch Stats
                 const docRef = doc(db, "settings", "stats");
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setStats(docSnap.data());
                 }
+
             } catch (error) {
                 console.error("Error fetching stats:", error);
             } finally {
@@ -43,6 +45,7 @@ const AdminStats = () => {
         setSaving(true);
         try {
             await setDoc(doc(db, "settings", "stats"), stats, { merge: true });
+
             setNotification({ type: 'success', message: 'Stats updated successfully!' });
         } catch (error) {
             console.error("Error updating stats:", error);
@@ -68,8 +71,8 @@ const AdminStats = () => {
             )}
 
             <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Homepage Statistics</h1>
-                <p className="text-slate-600">Update the numbers displayed on the home page.</p>
+                <h1 className="text-2xl font-bold text-slate-900">Settings & Statistics</h1>
+                <p className="text-slate-600">Manage global settings and homepage numbers.</p>
             </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
+import SecurityMonitor from './components/SecurityMonitor';
 
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
@@ -20,6 +21,7 @@ const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
 const AdminManagement = lazy(() => import('./pages/admin/AdminManagement'));
 const AdminTeam = lazy(() => import('./pages/admin/AdminTeam'));
 const AdminStats = lazy(() => import('./pages/admin/AdminStats'));
+const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'));
 const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
 
 // Loading component
@@ -32,35 +34,39 @@ const PageLoader = () => (
 function App() {
   return (
     <Router>
-      <ScrollToTop />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<Layout><Outlet /></Layout>}>
-            <Route path="/" element={<Home />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/team-management" element={<TeamManagement />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/contact" element={<Contact />} />
-          </Route>
+      <SecurityMonitor>
+        <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* ... routes ... */}
+            {/* Public Routes */}
+            <Route element={<Layout><Outlet /></Layout>}>
+              <Route path="/" element={<Home />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/team-management" element={<TeamManagement />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/contact" element={<Contact />} />
+            </Route>
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<React.Fragment><meta httpEquiv="refresh" content="0; url=/admin/dashboard" /></React.Fragment>} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="gallery" element={<AdminGallery />} />
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="management" element={<AdminManagement />} />
-            <Route path="team" element={<AdminTeam />} />
-            <Route path="stats" element={<AdminStats />} />
-            <Route path="enquiries" element={<Enquiries />} />
-            {/* Add placeholders for other admin routes if needed */}
-          </Route>
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<Login />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<React.Fragment><meta httpEquiv="refresh" content="0; url=/admin/dashboard" /></React.Fragment>} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="gallery" element={<AdminGallery />} />
+              <Route path="courses" element={<AdminCourses />} />
+              <Route path="management" element={<AdminManagement />} />
+              <Route path="team" element={<AdminTeam />} />
+              <Route path="stats" element={<AdminStats />} />
+              <Route path="security" element={<AdminSecurity />} />
+              <Route path="enquiries" element={<Enquiries />} />
+              {/* Add placeholders for other admin routes if needed */}
+            </Route>
 
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
-        </Routes>
-      </Suspense>
+            <Route path="*" element={<Layout><NotFound /></Layout>} />
+          </Routes>
+        </Suspense>
+      </SecurityMonitor>
     </Router>
   );
 }
