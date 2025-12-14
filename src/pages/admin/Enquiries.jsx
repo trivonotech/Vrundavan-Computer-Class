@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageSquare, Clock, Mail, User, Trash2, Loader2 } from 'lucide-react';
+import { MessageSquare, Clock, Mail, User, Trash2, Loader2, Phone } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -69,6 +69,12 @@ const Enquiries = () => {
                                         <Mail size={14} className="shrink-0" />
                                         {enq.email}
                                     </div>
+                                    {enq.phone && (
+                                        <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg break-all">
+                                            <Phone size={14} className="shrink-0" />
+                                            {enq.phone}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Message Content */}

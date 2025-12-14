@@ -233,6 +233,7 @@ const ContactForm = () => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
+        phone: '', // Added field
         email: '',
         message: ''
     });
@@ -249,7 +250,7 @@ const ContactForm = () => {
             });
 
             setStatus('success');
-            setFormData({ firstName: '', lastName: '', email: '', message: '' });
+            setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
             setTimeout(() => setStatus('idle'), 5000);
         } catch (error) {
             console.error("Error submitting enquiry:", error);
@@ -288,17 +289,31 @@ const ContactForm = () => {
                     />
                 </div>
             </div>
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="john@example.com"
-                />
+            <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="john@example.com"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        required
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="+91 98765 43210"
+                    />
+                </div>
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>

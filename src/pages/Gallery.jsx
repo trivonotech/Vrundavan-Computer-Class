@@ -113,14 +113,12 @@ const Gallery = () => {
                                     <img
                                         src={image.src}
                                         alt={image.category}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        className="w-full h-full object-cover transition-transform duration-700"
                                         loading="lazy"
                                     />
-                                    <div className="absolute inset-0 bg-blue-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div className="text-center p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                            <ZoomIn className="w-8 h-8 text-white mx-auto mb-2" />
-                                            <p className="text-blue-100 text-sm">{image.category}</p>
-                                        </div>
+                                    {/* Event Label at Bottom - Visible on Hover */}
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                        <p className="text-white font-medium text-sm truncate">{image.category}</p>
                                     </div>
                                 </div>
                             ))}
