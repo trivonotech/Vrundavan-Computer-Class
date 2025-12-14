@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const Home = () => {
+    const [galleryItems, setGalleryItems] = useState([]);
+
+    useEffect(() => {
+        const fetchGallery = async () => {
+            try {
+                const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(15));
+                const snapshot = await getDocs(q);
+                const items = snapshot.docs.map(doc => ({
+                    image: doc.data().image,
+                    text: doc.data().text
+                }));
+                if (items.length > 0) {
+                    setGalleryItems(items);
+                }
+            } catch (error) {
+                console.error("Error fetching gallery:", error);
+            }
+        };
+
+        fetchGallery();
+    }, []);
     return (
         <div className="relative overflow-hidden">
 
@@ -271,6 +294,7 @@ const Home = () => {
                     </p>
                     <div style={{ height: '350px', position: 'relative', marginTop: '-30px', marginBottom: '-80px' }}>
                         <CircularGallery
+                            items={galleryItems.length > 0 ? galleryItems : undefined}
                             bend={0.5}
                             textColor="#ffffff"
                             borderRadius={0.05}

@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper to check if user is authenticated (Admin)
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Gallery Images
+    match /gallery/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Course Images
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

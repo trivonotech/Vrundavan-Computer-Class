@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageCircle, Clock, Globe, ChevronDown, ChevronUp, Twitter, Linkedin, Facebook, Building2 } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Contact = () => {
     const [activeLocation, setActiveLocation] = useState(0);
@@ -225,6 +227,8 @@ const FAQItem = ({ question, answer }) => {
     );
 };
 
+
+
 const ContactForm = () => {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -238,21 +242,17 @@ const ContactForm = () => {
         e.preventDefault();
         setStatus('submitting');
         try {
-            const response = await fetch("https://formspree.io/f/mvgeqyrp", {
-                method: "POST",
-                body: JSON.stringify(formData),
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+            await addDoc(collection(db, "enquiries"), {
+                ...formData,
+                createdAt: new Date(),
+                status: 'new' // standard status for admin
             });
 
-            if (response.ok) {
-                setStatus('success');
-                setFormData({ firstName: '', lastName: '', email: '', message: '' });
-                setTimeout(() => setStatus('idle'), 5000);
-            } else {
-                setStatus('error');
-                setTimeout(() => setStatus('idle'), 5000);
-            }
+            setStatus('success');
+            setFormData({ firstName: '', lastName: '', email: '', message: '' });
+            setTimeout(() => setStatus('idle'), 5000);
         } catch (error) {
+            console.error("Error submitting enquiry:", error);
             setStatus('error');
             setTimeout(() => setStatus('idle'), 5000);
         }

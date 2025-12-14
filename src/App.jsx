@@ -17,6 +17,8 @@ const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
+const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
+const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
 
 // Loading component
 const PageLoader = () => (
@@ -47,6 +49,8 @@ function App() {
             <Route index element={<React.Fragment><meta httpEquiv="refresh" content="0; url=/admin/dashboard" /></React.Fragment>} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="gallery" element={<AdminGallery />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route path="enquiries" element={<Enquiries />} />
             {/* Add placeholders for other admin routes if needed */}
           </Route>
 

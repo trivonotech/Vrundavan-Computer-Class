@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e) => {
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
-        // TODO: Implement Firebase Auth
-        setTimeout(() => {
+        setError('');
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate('/admin/dashboard');
+        } catch (err) {
+            console.error(err);
+            setError('Invalid email or password. Please try again.');
+        } finally {
             setLoading(false);
-            alert('Login functionality pending Firebase integration');
-        }, 1000);
+        }
     };
 
     return (
@@ -26,6 +38,13 @@ const Login = () => {
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
                     <p className="text-slate-500">Sign in to access your admin dashboard</p>
                 </div>
+
+                {error && (
+                    <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm">
+                        <AlertCircle size={20} className="shrink-0" />
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">

@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 import {
     LayoutDashboard,
     Image as ImageIcon,
@@ -20,6 +23,29 @@ const AdminLayout = () => {
         { path: '/admin/courses', icon: BookOpen, label: 'Courses' },
         { path: '/admin/enquiries', icon: MessageSquare, label: 'Enquiries' },
     ];
+
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!currentUser) {
+            navigate('/admin/login');
+        }
+    }, [currentUser, navigate]);
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            navigate('/admin/login');
+        } catch (error) {
+            console.error("Error logging out:", error);
+        }
+    };
+
+    if (!currentUser) {
+        return null; // Or a loading spinner
+    }
 
     return (
         <div className="flex h-screen bg-slate-50">
@@ -53,8 +79,8 @@ const AdminLayout = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                     }`}
                             >
                                 <Icon size={20} />
@@ -65,7 +91,10 @@ const AdminLayout = () => {
                 </nav>
 
                 <div className="absolute bottom-0 w-full p-4 border-t border-slate-800">
-                    <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-slate-800 hover:text-red-300 transition-colors">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-slate-800 hover:text-red-300 transition-colors"
+                    >
                         <LogOut size={20} />
                         <span className="font-medium">Logout</span>
                     </button>
@@ -85,7 +114,7 @@ const AdminLayout = () => {
 
                     <div className="flex items-center gap-4 ml-auto">
                         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                            A
+                            {currentUser?.email?.[0]?.toUpperCase() || 'A'}
                         </div>
                     </div>
                 </header>
