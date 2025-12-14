@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ExternalLink, Loader2, X, Upload, Edit2, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, ExternalLink, Loader2, X, Upload, Edit2, ChevronDown, Star } from 'lucide-react';
 import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -123,6 +122,18 @@ const AdminGallery = () => {
         setShowSuggestions(false);
     };
 
+    const toggleFeatured = async (image) => {
+        try {
+            const newStatus = !image.featured;
+            await updateDoc(doc(db, "gallery", image.id), {
+                featured: newStatus
+            });
+        } catch (error) {
+            console.error("Error updating featured status:", error);
+            alert("Failed to update status");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         // if (!formData.text) return; // Validation removed
@@ -160,6 +171,7 @@ const AdminGallery = () => {
                         text: '',
                         category: category,
                         image: imageUrl,
+                        featured: false, // Default to not featured
                         createdAt: new Date()
                     });
                 });
@@ -179,11 +191,17 @@ const AdminGallery = () => {
         }
     };
 
-    const handleDelete = async (image) => {
-        if (!window.confirm("Are you sure you want to delete this image?")) return;
+    const [deleteTarget, setDeleteTarget] = useState(null); // Image to delete
 
+    const handleDelete = (image) => {
+        setDeleteTarget(image);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await deleteDoc(doc(db, "gallery", image.id));
+            await deleteDoc(doc(db, "gallery", deleteTarget.id));
+            setDeleteTarget(null);
         } catch (error) {
             console.error("Error deleting image:", error);
             alert("Failed to delete image.");
@@ -222,8 +240,8 @@ const AdminGallery = () => {
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                                 }`}
                         >
                             {cat}
@@ -246,24 +264,43 @@ const AdminGallery = () => {
                                 <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded text-xs font-medium text-white">
                                     {img.category || 'General'}
                                 </div>
+                                {/* Featured Badge/Indicator if needed, or primarily reliance on the button state */}
+                                {img.featured && (
+                                    <div className="absolute top-2 right-2 bg-yellow-400 text-white p-1 rounded-full shadow-lg z-10">
+                                        <Star size={12} fill="currentColor" />
+                                    </div>
+                                )}
                             </div>
                             <div className="p-4 flex items-center justify-between">
                                 <span className="font-medium text-slate-700 truncate pr-2"></span>
-                                <div className="flex gap-1">
+                                <div className="flex gap-2 w-full justify-between">
                                     <button
-                                        onClick={() => handleOpenModal(img)}
-                                        className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg"
-                                        title="Edit"
+                                        onClick={() => toggleFeatured(img)}
+                                        className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg transition-all ${img.featured
+                                                ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
+                                                : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                                            }`}
                                     >
-                                        <Edit2 size={18} />
+                                        <Star size={18} fill={img.featured ? "currentColor" : "none"} className={img.featured ? "text-yellow-500" : ""} />
+                                        {img.featured ? 'Featured' : 'Feature'}
                                     </button>
-                                    <button
-                                        onClick={() => handleDelete(img)}
-                                        className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={() => handleOpenModal(img)}
+                                            className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+                                            title="Edit"
+                                        >
+                                            <Edit2 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(img)}
+                                            className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -274,6 +311,37 @@ const AdminGallery = () => {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-600" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Image?</h3>
+                            <p className="text-slate-500 text-sm mb-6">
+                                Are you sure you want to delete this image? This action cannot be undone.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteTarget(null)}
+                                    className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors shadow-md hover:shadow-lg"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal */}
             {showModal && (
@@ -318,19 +386,6 @@ const AdminGallery = () => {
                                     )}
                                 </label>
                             </div>
-
-                            {/* Title Input - Removed */}
-                            {/* <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Image Title / Caption</label>
-                                <input
-                                    type="text"
-                                    value={formData.text}
-                                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                                    placeholder="e.g. Annual Function 2024"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    required
-                                />
-                            </div> */}
 
                             {/* Category Input - Custom Dropdown */}
                             <div className="relative">
@@ -388,10 +443,9 @@ const AdminGallery = () => {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            if (window.confirm("Are you sure you want to delete this image?")) {
-                                                handleDelete(editingImage);
-                                                setShowModal(false);
-                                            }
+                                            // Handle delete from modal (optional, but consistent)
+                                            setDeleteTarget(editingImage);
+                                            setShowModal(false);
                                         }}
                                         className="px-4 py-3 rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-all"
                                     >

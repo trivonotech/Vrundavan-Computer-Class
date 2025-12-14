@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
-import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, getDoc, where } from 'firebase/firestore';
 import { db } from "../firebase";
 
 const Home = () => {
@@ -33,12 +33,29 @@ const Home = () => {
     useEffect(() => {
         const fetchGallery = async () => {
             try {
-                const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(15));
+                // Fetch featured images. 
+                // Note: We filter by 'featured' == true.
+                // We sort in-app to avoid needing a custom composite index immediately.
+                const q = query(collection(db, "gallery"), where("featured", "==", true));
                 const snapshot = await getDocs(q);
-                const items = snapshot.docs.map(doc => ({
+                let items = snapshot.docs.map(doc => ({
                     image: doc.data().image,
-                    text: doc.data().text
+                    text: doc.data().text,
+                    createdAt: doc.data().createdAt
                 }));
+
+                // Sort by createdAt desc in memory
+                items.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                // Limit to 15
+                if (items.length > 15) {
+                    items = items.slice(0, 15);
+                }
+
                 if (items.length > 0) {
                     setGalleryItems(items);
                 }
