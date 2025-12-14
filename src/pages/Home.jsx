@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from "../firebase";
 
 const Home = () => {
     const [galleryItems, setGalleryItems] = useState([]);
