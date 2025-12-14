@@ -8,9 +8,11 @@ const AdminGallery = () => {
     const [loading, setLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [activeCategory, setActiveCategory] = useState('All');
 
     // Form State
     const [newImageTitle, setNewImageTitle] = useState('');
+    const [newImageCategory, setNewImageCategory] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
@@ -27,6 +29,9 @@ const AdminGallery = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // Extract unique categories for filter and suggestions
+    const categories = ['All', ...new Set(images.map(img => img.category).filter(Boolean))];
 
     // Helper: Convert to WebP & Compress
     const optimizeImage = (file) => {
@@ -87,12 +92,14 @@ const AdminGallery = () => {
             // 2. Save DIRECTLY to Firestore (No Storage needed)
             await addDoc(collection(db, "gallery"), {
                 text: newImageTitle,
+                category: newImageCategory || 'General', // Default to General if empty
                 image: updatedImageBase64, // Storing Base64 string
                 createdAt: new Date()
             });
 
             setShowAddModal(false);
             setNewImageTitle('');
+            setNewImageCategory('');
             setSelectedFile(null);
             setPreviewUrl('');
         } catch (error) {
@@ -119,6 +126,10 @@ const AdminGallery = () => {
         return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-blue-600" size={32} /></div>;
     }
 
+    const filteredImages = activeCategory === 'All'
+        ? images
+        : images.filter(img => img.category === activeCategory);
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -135,10 +146,28 @@ const AdminGallery = () => {
                 </button>
             </div>
 
+            {/* Filter Tabs */}
+            {categories.length > 1 && ( // Only show if we have categories other than All
+                <div className="flex flex-wrap gap-2 pb-2">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* Gallery Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {images.length > 0 ? (
-                    images.map((img) => (
+                {filteredImages.length > 0 ? (
+                    filteredImages.map((img) => (
                         <div key={img.id} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all">
                             <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                                 <img
@@ -146,6 +175,9 @@ const AdminGallery = () => {
                                     alt={img.text}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
+                                <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded text-xs font-medium text-white">
+                                    {img.category || 'General'}
+                                </div>
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <a
                                         href={img.image}
@@ -170,7 +202,7 @@ const AdminGallery = () => {
                     ))
                 ) : (
                     <div className="col-span-full py-12 text-center text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-                        <p>No images in gallery yet.</p>
+                        <p>No images found in this category.</p>
                     </div>
                 )}
             </div>
@@ -178,7 +210,7 @@ const AdminGallery = () => {
             {/* Add Image Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
                         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                             <h3 className="font-bold text-lg text-slate-900">Add New Image</h3>
                             <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
@@ -198,7 +230,7 @@ const AdminGallery = () => {
                                 />
                                 <label
                                     htmlFor="file-upload"
-                                    className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all ${previewUrl ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+                                    className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all ${previewUrl ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
                                         }`}
                                 >
                                     {previewUrl ? (
@@ -223,6 +255,25 @@ const AdminGallery = () => {
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
                                 />
+                            </div>
+
+                            {/* Category Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Event / Category</label>
+                                <input
+                                    type="text"
+                                    list="category-suggestions"
+                                    value={newImageCategory}
+                                    onChange={(e) => setNewImageCategory(e.target.value)}
+                                    placeholder="e.g. Annual Function"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                                <datalist id="category-suggestions">
+                                    {categories.filter(c => c !== 'All').map(cat => (
+                                        <option key={cat} value={cat} />
+                                    ))}
+                                </datalist>
+                                <p className="text-xs text-slate-500 mt-1">Type a new event name to create filter, or select existing.</p>
                             </div>
 
                             <button
