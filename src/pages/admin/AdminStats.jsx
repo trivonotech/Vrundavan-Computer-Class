@@ -6,12 +6,20 @@ import { db } from '../../firebase';
 const AdminStats = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [notification, setNotification] = useState(null); // { type: 'success'|'error', message: '' }
     const [stats, setStats] = useState({
         experience: '21+',
         events: '150+',
         students: '12k+',
         courses: '25+'
     });
+
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -35,10 +43,10 @@ const AdminStats = () => {
         setSaving(true);
         try {
             await setDoc(doc(db, "settings", "stats"), stats, { merge: true });
-            alert("Stats updated successfully!");
+            setNotification({ type: 'success', message: 'Stats updated successfully!' });
         } catch (error) {
             console.error("Error updating stats:", error);
-            alert("Failed to update stats.");
+            setNotification({ type: 'error', message: 'Failed to update stats.' });
         } finally {
             setSaving(false);
         }
@@ -49,7 +57,16 @@ const AdminStats = () => {
     if (loading) return <Loader2 className="animate-spin mx-auto mt-10" />;
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-6 relative">
+            {/* Notification Toast */}
+            {notification && (
+                <div className={`fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 transform transition-all duration-300 z-50 animate-fade-in-up ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                    }`}>
+                    {notification.type === 'success' ? <Save size={20} /> : <BarChart3 size={20} />}
+                    <span className="font-medium">{notification.message}</span>
+                </div>
+            )}
+
             <div className="text-center mb-8">
                 <h1 className="text-2xl font-bold text-slate-900">Homepage Statistics</h1>
                 <p className="text-slate-600">Update the numbers displayed on the home page.</p>

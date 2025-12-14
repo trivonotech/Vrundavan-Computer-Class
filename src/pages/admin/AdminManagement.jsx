@@ -9,6 +9,7 @@ const AdminManagement = () => {
     const [showModal, setShowModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
+    const [notification, setNotification] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -18,6 +19,13 @@ const AdminManagement = () => {
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
+
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     useEffect(() => {
         const q = query(collection(db, "management"), orderBy("createdAt", "desc"));
@@ -104,9 +112,10 @@ const AdminManagement = () => {
 
             if (editingMember) {
                 await updateDoc(doc(db, "management", editingMember.id), dataToSave);
+                setNotification({ type: 'success', message: 'Member updated successfully' });
             } else {
                 if (!selectedFile) {
-                    alert("Image is required");
+                    setNotification({ type: 'error', message: 'Image is required' });
                     setIsUploading(false);
                     return;
                 }
@@ -114,11 +123,12 @@ const AdminManagement = () => {
                     ...dataToSave,
                     createdAt: new Date()
                 });
+                setNotification({ type: 'success', message: 'Member added successfully' });
             }
             setShowModal(false);
         } catch (error) {
             console.error(error);
-            alert("Error saving member");
+            setNotification({ type: 'error', message: 'Error saving member' });
         }
         setIsUploading(false);
     };
@@ -126,13 +136,23 @@ const AdminManagement = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Delete this member?")) {
             await deleteDoc(doc(db, "management", id));
+            setNotification({ type: 'success', message: 'Member deleted' });
         }
     };
 
     if (loading) return <Loader2 className="animate-spin mx-auto mt-10" />;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+            {/* Notification Toast */}
+            {notification && (
+                <div className={`fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 transform transition-all duration-300 z-[60] animate-fade-in-up ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                    }`}>
+                    {notification.type === 'success' ? <Save size={20} /> : <X size={20} />}
+                    <span className="font-medium">{notification.message}</span>
+                </div>
+            )}
+
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Management Team</h1>
                 <button onClick={() => handleOpenModal()} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
