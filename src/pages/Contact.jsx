@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageCircle, Clock, Globe, ChevronDown, ChevronUp, Twitter, Linkedin, Facebook, Building2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, getDoc, doc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const Contact = () => {
@@ -231,66 +230,17 @@ const FAQItem = ({ question, answer }) => {
 
 
 const ContactForm = () => {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        phone: '',
+        phone: '', // Added field
         email: '',
         message: ''
     });
     const [status, setStatus] = useState('idle');
 
-    const checkSpam = async () => {
-        let settings = { spamProtection: true, maxRequestsPerMinute: 5 };
-
-        try {
-            // 1. Get Security Settings (try-catch isolated to fetch)
-            const settingsDoc = await getDoc(doc(db, "settings", "security"));
-            if (settingsDoc.exists()) {
-                settings = settingsDoc.data();
-            }
-        } catch (error) {
-            console.warn("Could not fetch security settings, using defaults:", error);
-            // Continue using default settings
-        }
-
-        if (!settings.spamProtection) return true;
-
-        try {
-            // 2. Check Local History
-            const now = Date.now();
-            const oneMinuteAgo = now - 60000;
-            const requestLog = JSON.parse(localStorage.getItem('contact_requests') || '[]');
-
-            // Filter requests from last minute
-            const recentRequests = requestLog.filter(time => time > oneMinuteAgo);
-
-            if (recentRequests.length >= settings.maxRequestsPerMinute) {
-                return false; // Spam detected
-            }
-
-            // 3. Update Log
-            recentRequests.push(now);
-            localStorage.setItem('contact_requests', JSON.stringify(recentRequests));
-            return true;
-
-        } catch (error) {
-            console.error("Local spam check failed:", error);
-            return true; // Use basic fail-safe only for local storage errors
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Anti-Spam Check
-        const isSafe = await checkSpam();
-        if (!isSafe) {
-            navigate('/access-denied');
-            return;
-        }
-
         setStatus('submitting');
         try {
             await addDoc(collection(db, "enquiries"), {

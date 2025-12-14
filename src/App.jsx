@@ -9,7 +9,6 @@ const Courses = lazy(() => import('./pages/Courses'));
 const TeamManagement = lazy(() => import('./pages/TeamManagement'));
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Contact = lazy(() => import('./pages/Contact'));
-const AccessDenied = lazy(() => import('./pages/AccessDenied'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Lazy load Admin pages
@@ -21,7 +20,6 @@ const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
 const AdminManagement = lazy(() => import('./pages/admin/AdminManagement'));
 const AdminTeam = lazy(() => import('./pages/admin/AdminTeam'));
 const AdminStats = lazy(() => import('./pages/admin/AdminStats'));
-const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'));
 const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
 
 // Loading component
@@ -44,7 +42,6 @@ function App() {
             <Route path="/team-management" element={<TeamManagement />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/access-denied" element={<AccessDenied />} />
           </Route>
 
           {/* Admin Routes */}
@@ -57,7 +54,6 @@ function App() {
             <Route path="management" element={<AdminManagement />} />
             <Route path="team" element={<AdminTeam />} />
             <Route path="stats" element={<AdminStats />} />
-            <Route path="security" element={<AdminSecurity />} />
             <Route path="enquiries" element={<Enquiries />} />
             {/* Add placeholders for other admin routes if needed */}
           </Route>
