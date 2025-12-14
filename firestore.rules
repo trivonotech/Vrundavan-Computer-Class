@@ -43,10 +43,5 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-
-    // Security Logs: Admin Read/Write
-    match /security_logs/{logId} {
-      allow read, write: if isAdmin();
-    }
   }
 }
