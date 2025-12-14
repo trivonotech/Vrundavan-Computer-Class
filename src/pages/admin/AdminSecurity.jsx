@@ -259,7 +259,6 @@ const AdminSecurity = () => {
                         Save Configuration
                     </button>
                 </div>
-
             </form>
         </div>
     );

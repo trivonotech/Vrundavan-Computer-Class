@@ -14,7 +14,8 @@ import {
     User,
     Users,
     BarChart3,
-    Shield
+    Shield,
+    Activity
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -29,6 +30,7 @@ const AdminLayout = () => {
         { path: '/admin/team', icon: Users, label: 'Team' },
         { path: '/admin/stats', icon: BarChart3, label: 'Stats' },
         { path: '/admin/security', icon: Shield, label: 'Security' },
+        { path: '/admin/diagnostics', icon: Activity, label: 'Diagnostics' },
         { path: '/admin/enquiries', icon: MessageSquare, label: 'Enquiries' },
     ];
 
