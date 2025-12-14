@@ -58,13 +58,13 @@ const TeamManagement = () => {
 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
                         {leaders.map((leader) => (
-                            <div key={leader.id} className="bg-white rounded-2xl p-4 md:p-6 text-center shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
-                                <div className="w-20 h-20 md:w-32 md:h-32 mx-auto mb-3 md:mb-6 rounded-full overflow-hidden border-2 md:border-4 border-blue-50">
-                                    <img src={leader.image} alt={leader.name} className="w-full h-full object-cover" />
+                            <div key={leader.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
+                                <img src={leader.image} alt={leader.name} className="w-full h-40 md:h-64 object-cover" />
+                                <div className="p-3 md:p-6 text-center">
+                                    <h3 className="text-sm md:text-lg font-bold text-slate-900">{leader.name}</h3>
+                                    <p className="text-blue-600 text-xs md:text-sm font-medium">{leader.role}</p>
+                                    <p className="text-slate-500 text-[10px] md:text-sm mt-1 md:mt-2 line-clamp-2">{leader.bio}</p>
                                 </div>
-                                <h3 className="text-sm md:text-xl font-bold text-slate-900">{leader.name}</h3>
-                                <p className="text-blue-600 text-xs md:text-base font-medium mb-2 md:mb-4">{leader.role}</p>
-                                <p className="text-slate-600 text-[10px] md:text-sm line-clamp-3 md:line-clamp-none leading-relaxed">{leader.bio}</p>
                             </div>
                         ))}
                     </div>
