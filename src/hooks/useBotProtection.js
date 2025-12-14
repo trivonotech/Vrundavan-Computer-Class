@@ -26,6 +26,13 @@ const useBotProtection = () => {
 
             if (!settings.botProtection) return;
 
+            // 0. Check for Active Block (The "Jail" Logic)
+            const blockUntil = localStorage.getItem('access_block_until');
+            if (blockUntil && parseInt(blockUntil) > Date.now()) {
+                navigate('/access-denied', { replace: true });
+                return;
+            }
+
             // 2. Check User Agent
             const userAgent = navigator.userAgent.toLowerCase();
             const botKeywords = ['bot', 'spider', 'crawler', 'scraper', 'headless', 'selenium', 'puppeteer'];

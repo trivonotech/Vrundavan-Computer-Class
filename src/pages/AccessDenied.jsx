@@ -5,30 +5,59 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const AccessDenied = () => {
-    const [timeLeft, setTimeLeft] = useState(30 * 60); // Default 30 mins
+    const [timeLeft, setTimeLeft] = useState(null); // Init null to show loading or blocking state
 
     useEffect(() => {
-        const fetchSettings = async () => {
+        const handleBlockLogic = async () => {
+            const now = Date.now();
+            const storedEndTime = localStorage.getItem('access_block_until');
+
+            // 1. Check if an active block already exists
+            if (storedEndTime && parseInt(storedEndTime) > now) {
+                setTimeLeft(Math.ceil((parseInt(storedEndTime) - now) / 1000));
+                return;
+            }
+
+            // 2. If no active block, fetch settings and create one
             try {
                 const docRef = doc(db, "settings", "security");
                 const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.blockDurationMinutes) {
-                        setTimeLeft(data.blockDurationMinutes * 60);
-                    }
-                }
+                const durationMinutes = (docSnap.exists() && docSnap.data().blockDurationMinutes)
+                    ? docSnap.data().blockDurationMinutes
+                    : 30; // Default 30 mins
+
+                const newEndTime = now + (durationMinutes * 60 * 1000);
+                localStorage.setItem('access_block_until', newEndTime.toString());
+                setTimeLeft(durationMinutes * 60);
             } catch (error) {
-                console.error("Error fetching settings:", error);
+                console.error("Error init block:", error);
+                // Fallback default
+                const newEndTime = now + (30 * 60 * 1000);
+                localStorage.setItem('access_block_until', newEndTime.toString());
+                setTimeLeft(30 * 60);
             }
         };
-        fetchSettings();
+
+        handleBlockLogic();
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+            const storedEndTime = localStorage.getItem('access_block_until');
+            if (storedEndTime) {
+                const remaining = Math.ceil((parseInt(storedEndTime) - Date.now()) / 1000);
+                if (remaining <= 0) {
+                    localStorage.removeItem('access_block_until');
+                    setTimeLeft(0);
+                    // Optionally redirect home here if we wanted auto-unblock
+                } else {
+                    setTimeLeft(remaining);
+                }
+            }
         }, 1000);
+
         return () => clearInterval(timer);
     }, []);
+
+    if (timeLeft === null) return null; // Avoid flash
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
