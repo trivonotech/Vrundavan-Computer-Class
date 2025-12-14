@@ -2,10 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from "../firebase";
 
 const Home = () => {
+    const [stats, setStats] = useState({
+        experience: '21+',
+        events: '150+',
+        students: '12k+',
+        courses: '25+'
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const docRef = doc(db, "settings", "stats");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setStats(docSnap.data());
+                }
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+            }
+        };
+        fetchStats();
+    }, []);
+
     const [galleryItems, setGalleryItems] = useState([]);
 
     useEffect(() => {
@@ -168,28 +190,28 @@ const Home = () => {
                         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 mb-1 shadow-sm">
                             <Clock size={20} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">21+</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{stats.experience}</h3>
                         <p className="text-slate-600 font-medium text-xs">Years of Experience</p>
                     </div>
                     <div className="text-center space-y-2 md:border-r md:border-blue-900">
                         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-600 mb-1 shadow-sm">
                             <Award size={20} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">150+</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{stats.events}</h3>
                         <p className="text-slate-600 font-medium text-xs">Events Completed</p>
                     </div>
                     <div className="text-center space-y-2 md:border-r md:border-blue-900">
                         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600 mb-1 shadow-sm">
                             <Users size={20} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">12k+</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{stats.students}</h3>
                         <p className="text-slate-600 font-medium text-xs">Students</p>
                     </div>
                     <div className="text-center space-y-2">
                         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 text-orange-600 mb-1 shadow-sm">
                             <BookOpen size={20} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">25+</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{stats.courses}</h3>
                         <p className="text-slate-600 font-medium text-xs">Courses</p>
                     </div>
                 </section>

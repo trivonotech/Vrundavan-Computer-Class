@@ -25,5 +25,23 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
       allow update: if false;
     }
+
+    // Management: Public Read, Admin Write
+    match /management/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Team: Public Read, Admin Write
+    match /team/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings (Stats): Public Read, Admin Write
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

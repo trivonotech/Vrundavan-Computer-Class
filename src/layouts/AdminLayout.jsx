@@ -10,7 +10,10 @@ import {
     MessageSquare,
     LogOut,
     Menu,
-    X
+    X,
+    User,
+    Users,
+    BarChart3
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -21,6 +24,9 @@ const AdminLayout = () => {
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/gallery', icon: ImageIcon, label: 'Gallery' },
         { path: '/admin/courses', icon: BookOpen, label: 'Courses' },
+        { path: '/admin/management', icon: User, label: 'Management' },
+        { path: '/admin/team', icon: Users, label: 'Team' },
+        { path: '/admin/stats', icon: BarChart3, label: 'Stats' },
         { path: '/admin/enquiries', icon: MessageSquare, label: 'Enquiries' },
     ];
 

@@ -18,6 +18,9 @@ const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
 const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
+const AdminManagement = lazy(() => import('./pages/admin/AdminManagement'));
+const AdminTeam = lazy(() => import('./pages/admin/AdminTeam'));
+const AdminStats = lazy(() => import('./pages/admin/AdminStats'));
 const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
 
 // Loading component
@@ -50,6 +53,9 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="courses" element={<AdminCourses />} />
+            <Route path="management" element={<AdminManagement />} />
+            <Route path="team" element={<AdminTeam />} />
+            <Route path="stats" element={<AdminStats />} />
             <Route path="enquiries" element={<Enquiries />} />
             {/* Add placeholders for other admin routes if needed */}
           </Route>
