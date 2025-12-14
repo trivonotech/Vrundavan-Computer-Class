@@ -10,6 +10,7 @@ const AdminTeam = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const [notification, setNotification] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -120,10 +121,19 @@ const AdminTeam = () => {
         setIsUploading(false);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Delete this member?")) {
-            await deleteDoc(doc(db, "team", id));
-            setNotification({ type: 'success', message: 'Member deleted' });
+    const handleDelete = (member) => {
+        setDeleteTarget(member);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            await deleteDoc(doc(db, "team", deleteTarget.id));
+            setNotification({ type: 'success', message: 'Member deleted successfully' });
+            setDeleteTarget(null);
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            setNotification({ type: 'error', message: 'Failed to delete member' });
         }
     };
 
@@ -157,11 +167,42 @@ const AdminTeam = () => {
 
                         <div className="flex gap-2 justify-center opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 bg-white/90 p-1 rounded-lg shadow-sm">
                             <button onClick={() => handleOpenModal(member)} className="text-blue-500 hover:bg-blue-50 p-1 rounded"><Edit size={16} /></button>
-                            <button onClick={() => handleDelete(member.id)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
+                            <button onClick={() => handleDelete(member)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-600" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Member?</h3>
+                            <p className="text-slate-500 text-sm mb-6">
+                                Are you sure you want to delete <strong>{deleteTarget.name}</strong>? This action cannot be undone.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteTarget(null)}
+                                    className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors shadow-md hover:shadow-lg"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal */}
             {showModal && (
