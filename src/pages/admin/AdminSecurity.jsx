@@ -268,67 +268,68 @@ const AdminSecurity = () => {
 };
 
 const SecurityAuditLog = ({ settings }) => {
-    const [logs, setLogs] = useState([]);
-    const [copied, setCopied] = useState(false);
+    const [activeLogs, setActiveLogs] = useState([]);
+    const [historyLogs, setHistoryLogs] = useState([]);
 
+    // 1. Calculate Active Logs (Weakness Detection)
     useEffect(() => {
-        // 1. Live Configuration Weakness Analysis (Computed)
-        const analyzeWeaknesses = () => {
-            const computedLogs = [];
-            const addWeakness = (level, message) => {
-                computedLogs.push({
-                    id: `weakness-${Math.random()}`,
-                    timestamp: new Date().toISOString(), // Always "now" for active issues
+        const computeWeaknesses = () => {
+            const logs = [];
+            const add = (level, message) => {
+                logs.push({
+                    id: `active-${Math.random()}`,
+                    timestamp: new Date().toISOString(),
                     level,
                     message,
-                    type: 'active_alert' // To distinguish from historical events
+                    type: 'active'
                 });
             };
 
             if (!settings.enabled) {
-                addWeakness('CRITICAL', 'SECURITY SHIELD IS DISABLED. System is vulnerable.');
+                add('CRITICAL', 'SECURITY SHIELD IS DISABLED. System is vulnerable.');
             }
             if (settings.lockdown) {
-                addWeakness('WARN', 'System Lockdown is ACTIVE. Public access restricted.');
+                add('WARN', 'System Lockdown is ACTIVE. Public access restricted.');
             }
             if (settings.maxReloads > 10) {
-                addWeakness('WARN', `Weak Config: "Max Reloads" (${settings.maxReloads}) is too high.`);
+                add('WARN', `Weak Config: "Max Reloads" (${settings.maxReloads}) is too high.`);
             }
             if (settings.timeWindow < 5) {
-                addWeakness('WARN', `Weak Config: "Time Window" (${settings.timeWindow}s) is too short.`);
+                add('WARN', `Weak Config: "Time Window" (${settings.timeWindow}s) is too short.`);
             }
             if (settings.blockDuration < 5) {
-                addWeakness('WARN', `Weak Config: "Block Duration" (${settings.blockDuration}m) is too short.`);
+                add('WARN', `Weak Config: "Block Duration" (${settings.blockDuration}m) is too short.`);
             }
             if (window.location.protocol !== 'https:') {
-                addWeakness('ERROR', 'Insecure Connection: Not using HTTPS.');
+                add('ERROR', 'Insecure Connection: Not using HTTPS.');
             }
 
-            return computedLogs;
+            return logs;
         };
 
-        // 2. Persistent Event Logs (From Firestore)
-        const q = query(collection(db, "security_logs"), orderBy("timestamp", "desc"), limit(20));
+        setActiveLogs(computeWeaknesses());
+    }, [settings]);
 
+    // 2. Fetch History Logs (Persistent)
+    useEffect(() => {
+        const q = query(collection(db, "security_logs"), orderBy("timestamp", "desc"), limit(20));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const historyLogs = snapshot.docs.map(doc => ({
+            const logs = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
                 timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString()
             }));
-
-            // Merge Active Weaknesses + History
-            const activeWeaknesses = analyzeWeaknesses();
-            const combined = [...activeWeaknesses, ...historyLogs];
-
-            // Slice to requested limit (last 10)
-            setLogs(combined.slice(0, 10));
+            setHistoryLogs(logs);
+        }, (error) => {
+            console.error("Error fetching security logs:", error);
         });
-
         return () => unsubscribe();
-    }, [settings]);
+    }, []);
 
-    if (logs.length === 0) return null;
+    // Combine and Slice
+    const allLogs = [...activeLogs, ...historyLogs].slice(0, 10);
+
+    if (allLogs.length === 0) return null;
 
     return (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl mt-8">
@@ -343,7 +344,7 @@ const SecurityAuditLog = ({ settings }) => {
             </div>
 
             <div className="p-0 font-mono text-sm max-h-[400px] overflow-y-auto custom-scrollbar bg-slate-900/50">
-                {logs.map((log, index) => (
+                {allLogs.map((log, index) => (
                     <LogItem key={log.id} log={log} isEven={index % 2 === 0} />
                 ))}
             </div>
@@ -369,10 +370,10 @@ const LogItem = ({ log, isEven }) => {
                 </span>
                 <div className="flex flex-col gap-1 w-full">
                     <span className={`font-bold text-xs uppercase tracking-wider ${log.level === 'CRITICAL' ? 'text-red-500' :
-                            log.level === 'ERROR' ? 'text-red-400' :
-                                log.level === 'WARN' ? 'text-amber-500' :
-                                    log.level === 'SUCCESS' ? 'text-green-500' :
-                                        'text-blue-400'
+                        log.level === 'ERROR' ? 'text-red-400' :
+                            log.level === 'WARN' ? 'text-amber-500' :
+                                log.level === 'SUCCESS' ? 'text-green-500' :
+                                    'text-blue-400'
                         }`}>
                         {log.level}
                     </span>
