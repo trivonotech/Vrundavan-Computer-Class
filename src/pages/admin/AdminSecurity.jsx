@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Shield, ShieldAlert, Clock, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { Save, Shield, ShieldAlert, Clock, AlertTriangle, CheckCircle, Info, Lock } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -112,6 +112,44 @@ const AdminSecurity = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
 
+                {/* System Lockdown / Maintenance Mode */}
+                <div className="bg-red-50 p-6 rounded-2xl border border-red-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${settings.lockdown ? 'bg-red-500 text-white' : 'bg-red-100 text-red-500'}`}>
+                            <Lock size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-slate-900">System Lockdown</h3>
+                            <p className="text-sm text-slate-600 max-w-md">
+                                Activate <strong>Maintenance Mode</strong>. This will block access to the public website and show a maintenance message to all visitors. Admin panel remains accessible.
+                            </p>
+                        </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="lockdown"
+                            checked={settings.lockdown || false}
+                            onChange={async (e) => {
+                                const isChecked = e.target.checked;
+                                // Optimistic update
+                                setSettings(prev => ({ ...prev, lockdown: isChecked }));
+                                try {
+                                    await setDoc(doc(db, "settings", "security"), { ...settings, lockdown: isChecked }, { merge: true });
+                                    setNotification({ type: 'success', message: `System Lockdown ${isChecked ? 'ACTIVATED' : 'DEACTIVATED'}` });
+                                } catch (error) {
+                                    console.error("Error toggling lockdown:", error);
+                                    setNotification({ type: 'error', message: "Failed to toggle lockdown" });
+                                    // Revert on error
+                                    setSettings(prev => ({ ...prev, lockdown: !isChecked }));
+                                }
+                            }}
+                            className="sr-only peer"
+                        />
+                        <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-100 rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
+                </div>
+
                 {/* Master Switch */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -131,7 +169,7 @@ const AdminSecurity = () => {
                             onChange={handleChange}
                             className="sr-only peer"
                         />
-                        <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+                        <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
                     </label>
                 </div>
 
@@ -203,6 +241,8 @@ const AdminSecurity = () => {
                         </div>
                     </div>
                 </div>
+
+
 
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-sm text-blue-700">
                     <Info className="shrink-0 mt-0.5" size={18} />

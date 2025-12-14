@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ShieldAlert, Lock, Clock } from 'lucide-react';
@@ -23,7 +24,8 @@ const SecurityMonitor = ({ children }) => {
                     enabled: data.enabled === true,
                     maxReloads: data.maxReloads || 5,
                     timeWindow: data.timeWindow || 10,
-                    blockDuration: data.blockDuration || 30
+                    blockDuration: data.blockDuration || 30,
+                    lockdown: data.lockdown === true
                 });
             }
             setLoading(false);
@@ -116,6 +118,51 @@ const SecurityMonitor = ({ children }) => {
     };
 
     if (loading) return null; // Or legitimate loading spinner? Let's just render children to avoid flash? No, better safe.
+
+    // 4. Maintenance Mode / Lockdown
+    const location = useLocation();
+
+    if (settings.lockdown) {
+        // Allow Admin access
+        const isAdmin = location.pathname.startsWith('/admin');
+
+        if (!isAdmin) {
+            return (
+                <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-4 text-center animate-in fade-in duration-500 overflow-hidden">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, #1e293b 0%, #020617 100%)' }}></div>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
+
+                    <div className="bg-slate-900/50 p-8 md:p-12 rounded-3xl backdrop-blur-2xl border border-white/5 max-w-lg w-full shadow-2xl relative z-10">
+
+                        {/* Icon with Ring Animation */}
+                        <div className="relative w-24 h-24 mx-auto mb-8">
+                            <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping"></div>
+                            <div className="relative bg-slate-900 border border-amber-500/50 text-amber-500 w-full h-full rounded-full flex items-center justify-center shadow-[0_0_30px_-5px_rgba(245,158,11,0.3)]">
+                                <Lock size={40} strokeWidth={1.5} />
+                            </div>
+                        </div>
+
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">System Lockdown</h1>
+                        <p className="text-slate-400 text-lg mb-8 leading-relaxed">
+                            The website is currently in <strong>Maintenance Mode</strong>.<br className="hidden md:block" /> We are performing critical updates.
+                        </p>
+
+                        <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/20 mb-8">
+                            <p className="text-amber-200 text-sm font-medium">
+                                Please check back shortly.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-2 text-xs text-slate-600 font-medium uppercase tracking-widest">
+                            <ShieldAlert size={12} />
+                            <span>Administrative Lock Active</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
 
     if (blockedUntil) {
         return (
