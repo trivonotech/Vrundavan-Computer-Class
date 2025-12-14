@@ -166,7 +166,20 @@ const AdminSecurity = () => {
                             type="checkbox"
                             name="enabled"
                             checked={settings.enabled}
-                            onChange={handleChange}
+                            onChange={async (e) => {
+                                const isChecked = e.target.checked;
+                                // Optimistic update
+                                setSettings(prev => ({ ...prev, enabled: isChecked }));
+                                try {
+                                    await setDoc(doc(db, "settings", "security"), { ...settings, enabled: isChecked }, { merge: true });
+                                    setNotification({ type: 'success', message: `Security Shield ${isChecked ? 'ACTIVATED' : 'DISABLED'}` });
+                                } catch (error) {
+                                    console.error("Error toggling security shield:", error);
+                                    setNotification({ type: 'error', message: "Failed to update Security Shield" });
+                                    // Revert on error
+                                    setSettings(prev => ({ ...prev, enabled: !isChecked }));
+                                }
+                            }}
                             className="sr-only peer"
                         />
                         <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
