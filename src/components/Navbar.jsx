@@ -11,9 +11,8 @@ const Navbar = () => {
     const navLinks = [
         { label: 'Home', link: '/', ariaLabel: 'Go to home page' },
         { label: 'Courses', link: '/courses', ariaLabel: 'View courses' },
-        { label: 'Management', link: '/management', ariaLabel: 'Meet management' },
+        { label: 'Team & Management', link: '/team-management', ariaLabel: 'Meet our team and management' },
         { label: 'Gallery', link: '/gallery', ariaLabel: 'View gallery' },
-        { label: 'Team', link: '/team', ariaLabel: 'Meet our team' },
         { label: 'Contact', link: '/contact', ariaLabel: 'Contact us' },
     ];
 

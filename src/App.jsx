@@ -6,9 +6,8 @@ import ScrollToTop from './components/ScrollToTop';
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
 const Courses = lazy(() => import('./pages/Courses'));
-const Management = lazy(() => import('./pages/Management'));
+const TeamManagement = lazy(() => import('./pages/TeamManagement'));
 const Gallery = lazy(() => import('./pages/Gallery'));
-const Team = lazy(() => import('./pages/Team'));
 const Contact = lazy(() => import('./pages/Contact'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -40,9 +39,8 @@ function App() {
           <Route element={<Layout><Outlet /></Layout>}>
             <Route path="/" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
-            <Route path="/management" element={<Management />} />
+            <Route path="/team-management" element={<TeamManagement />} />
             <Route path="/gallery" element={<Gallery />} />
-            <Route path="/team" element={<Team />} />
             <Route path="/contact" element={<Contact />} />
           </Route>
 
