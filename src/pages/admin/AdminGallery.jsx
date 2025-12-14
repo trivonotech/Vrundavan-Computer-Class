@@ -1,20 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ExternalLink, Loader2, X, Upload } from 'lucide-react';
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { Plus, Trash2, ExternalLink, Loader2, X, Upload, Edit2, ChevronDown } from 'lucide-react';
+import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const AdminGallery = () => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false); // Dropdown state
     const [activeCategory, setActiveCategory] = useState('All');
+    const [editingImage, setEditingImage] = useState(null); // ID of image being edited
 
     // Form State
-    const [newImageTitle, setNewImageTitle] = useState('');
-    const [newImageCategory, setNewImageCategory] = useState('');
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState('');
+    const [formData, setFormData] = useState({
+        text: '',
+        category: ''
+    });
+    const [selectedFiles, setSelectedFiles] = useState([]); // Array of files
+    const [previewUrls, setPreviewUrls] = useState([]);     // Array of preview strings
 
     useEffect(() => {
         const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
@@ -69,42 +74,106 @@ const AdminGallery = () => {
     };
 
     const handleFileSelect = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result);
-            };
-            reader.readAsDataURL(file);
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            // For Edit mode, we only allow one file replacement
+            if (editingImage) {
+                setSelectedFiles([files[0]]);
+                const reader = new FileReader();
+                reader.onloadend = () => setPreviewUrls([reader.result]);
+                reader.readAsDataURL(files[0]);
+            } else {
+                // Add mode: Append new files (or replace? Let's generic append for now, or just replace set)
+                // Replacing set is standard for input type=file unless we build a complex UI
+                setSelectedFiles(files);
+
+                const newPreviews = [];
+                let loadedCount = 0;
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        newPreviews.push(reader.result);
+                        loadedCount++;
+                        if (loadedCount === files.length) {
+                            setPreviewUrls(newPreviews);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
         }
     };
 
-    const handleUpload = async (e) => {
+    const handleOpenModal = (image = null) => {
+        if (image) {
+            setEditingImage(image);
+            setFormData({
+                text: image.text,
+                category: image.category || ''
+            });
+            setPreviewUrls([image.image]);
+            setSelectedFiles([]);
+        } else {
+            setEditingImage(null);
+            setFormData({ text: '', category: '' });
+            setPreviewUrls([]);
+            setSelectedFiles([]);
+        }
+        setShowModal(true);
+        setShowSuggestions(false);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedFile || !newImageTitle) return;
+        // if (!formData.text) return; // Validation removed
 
         setIsUploading(true);
         try {
-            // 1. Optimize Image (WebP + Resize)
-            const updatedImageBase64 = await optimizeImage(selectedFile);
+            const category = formData.category || 'General';
 
-            // 2. Save DIRECTLY to Firestore (No Storage needed)
-            await addDoc(collection(db, "gallery"), {
-                text: newImageTitle,
-                category: newImageCategory || 'General', // Default to General if empty
-                image: updatedImageBase64, // Storing Base64 string
-                createdAt: new Date()
-            });
+            if (editingImage) {
+                // EDIT MODE (Single logic)
+                let imageUrl = previewUrls[0]; // Default to existing image if no new file selected
+                if (selectedFiles.length > 0) {
+                    imageUrl = await optimizeImage(selectedFiles[0]);
+                }
 
-            setShowAddModal(false);
-            setNewImageTitle('');
-            setNewImageCategory('');
-            setSelectedFile(null);
-            setPreviewUrl('');
+                await updateDoc(doc(db, "gallery", editingImage.id), {
+                    text: '',
+                    category: category,
+                    image: imageUrl,
+                    updatedAt: new Date()
+                });
+
+            } else {
+                // ADD MODE (Batch Upload)
+                if (selectedFiles.length === 0) {
+                    alert("Please select at least one image");
+                    setIsUploading(false);
+                    return;
+                }
+
+                // Process all files in parallel
+                const uploadPromises = selectedFiles.map(async (file) => {
+                    const imageUrl = await optimizeImage(file);
+                    return addDoc(collection(db, "gallery"), {
+                        text: '',
+                        category: category,
+                        image: imageUrl,
+                        createdAt: new Date()
+                    });
+                });
+
+                await Promise.all(uploadPromises);
+            }
+
+            setShowModal(false);
+            setFormData({ text: '', category: '' });
+            setSelectedFiles([]);
+            setPreviewUrls([]);
         } catch (error) {
-            console.error("Error uploading image:", error);
-            alert(error.message || "Failed to upload image. Please try again.");
+            console.error("Error saving image:", error);
+            alert(error.message || "Failed to save image(s). Please try again.");
         } finally {
             setIsUploading(false);
         }
@@ -114,7 +183,6 @@ const AdminGallery = () => {
         if (!window.confirm("Are you sure you want to delete this image?")) return;
 
         try {
-            // Delete from Firestore only
             await deleteDoc(doc(db, "gallery", image.id));
         } catch (error) {
             console.error("Error deleting image:", error);
@@ -138,7 +206,7 @@ const AdminGallery = () => {
                     <p className="text-slate-500">Manage images shown in the circular gallery on home page.</p>
                 </div>
                 <button
-                    onClick={() => setShowAddModal(true)}
+                    onClick={() => handleOpenModal()}
                     className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
                 >
                     <Plus size={20} />
@@ -147,15 +215,15 @@ const AdminGallery = () => {
             </div>
 
             {/* Filter Tabs */}
-            {categories.length > 1 && ( // Only show if we have categories other than All
+            {categories.length > 1 && (
                 <div className="flex flex-wrap gap-2 pb-2">
                     {categories.map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                                 }`}
                         >
                             {cat}
@@ -178,25 +246,25 @@ const AdminGallery = () => {
                                 <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded text-xs font-medium text-white">
                                     {img.category || 'General'}
                                 </div>
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <a
-                                        href={img.image}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-colors"
-                                    >
-                                        <ExternalLink size={20} />
-                                    </a>
-                                </div>
                             </div>
                             <div className="p-4 flex items-center justify-between">
-                                <span className="font-medium text-slate-700 truncate pr-2">{img.text}</span>
-                                <button
-                                    onClick={() => handleDelete(img)}
-                                    className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                <span className="font-medium text-slate-700 truncate pr-2"></span>
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={() => handleOpenModal(img)}
+                                        className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+                                        title="Edit"
+                                    >
+                                        <Edit2 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(img)}
+                                        className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))
@@ -207,18 +275,18 @@ const AdminGallery = () => {
                 )}
             </div>
 
-            {/* Add Image Modal */}
-            {showAddModal && (
+            {/* Modal */}
+            {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
                         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="font-bold text-lg text-slate-900">Add New Image</h3>
-                            <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
+                            <h3 className="font-bold text-lg text-slate-900">{editingImage ? 'Edit Image' : 'Add New Image'}</h3>
+                            <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
                                 <X size={24} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpload} className="p-6 space-y-4">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             {/* Image Upload Area */}
                             <div className="relative">
                                 <input
@@ -226,63 +294,118 @@ const AdminGallery = () => {
                                     id="file-upload"
                                     className="hidden"
                                     accept="image/*"
+                                    multiple // Allow multiple selection
                                     onChange={handleFileSelect}
                                 />
                                 <label
                                     htmlFor="file-upload"
-                                    className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all ${previewUrl ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+                                    className={`flex flex-col items-center justify-center w-full min-h-[160px] border-2 border-dashed rounded-xl cursor-pointer transition-all ${previewUrls.length > 0 ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
                                         }`}
                                 >
-                                    {previewUrl ? (
-                                        <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-lg p-2" />
+                                    {previewUrls.length > 0 ? (
+                                        <div className="grid grid-cols-3 gap-2 p-2 w-full">
+                                            {previewUrls.map((url, idx) => (
+                                                <img key={idx} src={url} alt={`Preview ${idx}`} className="w-full h-24 object-cover rounded-lg shadow-sm" />
+                                            ))}
+                                            {/* Show a '+' box if user wants to imagine they can add more? No, input replaces. Just show images. */}
+                                        </div>
                                     ) : (
-                                        <div className="text-center text-slate-500">
+                                        <div className="text-center text-slate-500 p-4">
                                             <Upload className="mx-auto mb-2 text-slate-400" size={32} />
-                                            <span className="text-sm font-medium">Click to upload image</span>
+                                            <span className="text-sm font-medium">Click to select 1 or more images</span>
+                                            <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG</p>
                                         </div>
                                     )}
                                 </label>
                             </div>
 
-                            {/* Title Input */}
-                            <div>
+                            {/* Title Input - Removed */}
+                            {/* <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Image Title / Caption</label>
                                 <input
                                     type="text"
-                                    value={newImageTitle}
-                                    onChange={(e) => setNewImageTitle(e.target.value)}
+                                    value={formData.text}
+                                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
                                     placeholder="e.g. Annual Function 2024"
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
                                 />
-                            </div>
+                            </div> */}
 
-                            {/* Category Input */}
-                            <div>
+                            {/* Category Input - Custom Dropdown */}
+                            <div className="relative">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Event / Category</label>
-                                <input
-                                    type="text"
-                                    list="category-suggestions"
-                                    value={newImageCategory}
-                                    onChange={(e) => setNewImageCategory(e.target.value)}
-                                    placeholder="e.g. Annual Function"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                />
-                                <datalist id="category-suggestions">
-                                    {categories.filter(c => c !== 'All').map(cat => (
-                                        <option key={cat} value={cat} />
-                                    ))}
-                                </datalist>
-                                <p className="text-xs text-slate-500 mt-1">Type a new event name to create filter, or select existing.</p>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={formData.category}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, category: e.target.value });
+                                            setShowSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowSuggestions(true)}
+                                        placeholder="Type or select an event..."
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                        onClick={() => setShowSuggestions(!showSuggestions)}
+                                    >
+                                        <ChevronDown size={20} />
+                                    </button>
+                                </div>
+
+                                {showSuggestions && categories.length > 1 && (
+                                    <>
+                                        {/* Backdrop to close on click outside */}
+                                        <div className="fixed inset-0 z-10" onClick={() => setShowSuggestions(false)} />
+
+                                        <ul className="absolute z-20 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                                            {categories.filter(c => c !== 'All').map((cat) => (
+                                                <li
+                                                    key={cat}
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, category: cat });
+                                                        setShowSuggestions(false);
+                                                    }}
+                                                    className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-slate-600 font-medium transition-colors flex items-center gap-2"
+                                                >
+                                                    <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                                                    {cat}
+                                                </li>
+                                            ))}
+                                            <li className="px-4 py-3 text-xs text-slate-400 border-t border-slate-50 bg-slate-50/50">
+                                                Type above to add a new category...
+                                            </li>
+                                        </ul>
+                                    </>
+                                )}
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={isUploading || !selectedFile}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isUploading ? <Loader2 className="animate-spin" /> : 'Upload Image'}
-                            </button>
+                            <div className="flex gap-3">
+                                {editingImage && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (window.confirm("Are you sure you want to delete this image?")) {
+                                                handleDelete(editingImage);
+                                                setShowModal(false);
+                                            }
+                                        }}
+                                        className="px-4 py-3 rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-all"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={isUploading || (previewUrls.length === 0 && selectedFiles.length === 0)}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {isUploading ? <Loader2 className="animate-spin" /> : (editingImage ? 'Update Image' : `Upload ${selectedFiles.length > 0 ? selectedFiles.length : ''} Image${selectedFiles.length !== 1 ? 's' : ''}`)}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

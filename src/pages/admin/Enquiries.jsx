@@ -81,7 +81,7 @@ const Enquiries = () => {
                             {/* Actions */}
                             <button
                                 onClick={() => handleDelete(enq.id)}
-                                className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                 title="Delete Enquiry"
                             >
                                 <Trash2 size={20} />
