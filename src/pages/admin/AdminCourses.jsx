@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Search, Loader2, X, Upload, BookOpen } from 'lucide-react';
 import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 
 const AdminCourses = () => {
     const [courses, setCourses] = useState([]);
@@ -37,6 +36,39 @@ const AdminCourses = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // Helper: Convert to WebP & Compress
+    const optimizeImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = (img.width > MAX_WIDTH) ? MAX_WIDTH : img.width;
+                    const height = (img.width > MAX_WIDTH) ? (img.height * scaleSize) : img.height;
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
+
+                    if (compressedDataUrl.length > 1000000) {
+                        reject(new Error("Image is too large even after compression. Please pick a smaller image."));
+                    } else {
+                        resolve(compressedDataUrl);
+                    }
+                };
+                img.onerror = (error) => reject(error);
+            };
+        });
+    };
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -76,21 +108,16 @@ const AdminCourses = () => {
         setIsUploading(true);
         try {
             let imageUrl = formData.image;
-            let storagePath = editingCourse?.storagePath || '';
 
             // Handle Image Upload if new file selected
             if (selectedFile) {
-                const newStoragePath = `courses/${Date.now()}_${selectedFile.name}`;
-                const storageRef = ref(storage, newStoragePath);
-                const snapshot = await uploadBytes(storageRef, selectedFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
-                storagePath = snapshot.metadata.fullPath;
+                // Convert to WebP Base64
+                imageUrl = await optimizeImage(selectedFile);
             }
 
             const courseData = {
                 ...formData,
                 image: imageUrl,
-                storagePath,
                 updatedAt: new Date()
             };
 
@@ -108,7 +135,7 @@ const AdminCourses = () => {
             setShowModal(false);
         } catch (error) {
             console.error("Error saving course:", error);
-            alert("Failed to save course. Please try again.");
+            alert(error.message || "Failed to save course. Please try again.");
         } finally {
             setIsUploading(false);
         }
@@ -118,11 +145,8 @@ const AdminCourses = () => {
         if (!window.confirm("Are you sure you want to delete this course?")) return;
 
         try {
+            // Delete from Firestore only
             await deleteDoc(doc(db, "courses", course.id));
-            if (course.storagePath) {
-                const storageRef = ref(storage, course.storagePath);
-                await deleteObject(storageRef);
-            }
         } catch (error) {
             console.error("Error deleting course:", error);
             alert("Failed to delete course.");

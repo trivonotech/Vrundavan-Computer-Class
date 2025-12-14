@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, ExternalLink, Loader2, X, Upload } from 'lucide-react';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 
 const AdminGallery = () => {
     const [images, setImages] = useState([]);
@@ -29,6 +28,41 @@ const AdminGallery = () => {
         return () => unsubscribe();
     }, []);
 
+    // Helper: Convert to WebP & Compress
+    const optimizeImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Resize to max 800px width
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = (img.width > MAX_WIDTH) ? MAX_WIDTH : img.width;
+                    const height = (img.width > MAX_WIDTH) ? (img.height * scaleSize) : img.height;
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to WebP with 0.7 quality
+                    const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
+
+                    // Check size (must be < 1MB for Firestore)
+                    if (compressedDataUrl.length > 1000000) {
+                        reject(new Error("Image is too large even after compression. Please pick a smaller image."));
+                    } else {
+                        resolve(compressedDataUrl);
+                    }
+                };
+                img.onerror = (error) => reject(error);
+            };
+        });
+    };
+
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -47,16 +81,13 @@ const AdminGallery = () => {
 
         setIsUploading(true);
         try {
-            // 1. Upload to Storage
-            const storageRef = ref(storage, `gallery/${Date.now()}_${selectedFile.name}`);
-            const snapshot = await uploadBytes(storageRef, selectedFile);
-            const downloadURL = await getDownloadURL(snapshot.ref);
+            // 1. Optimize Image (WebP + Resize)
+            const updatedImageBase64 = await optimizeImage(selectedFile);
 
-            // 2. Save to Firestore
+            // 2. Save DIRECTLY to Firestore (No Storage needed)
             await addDoc(collection(db, "gallery"), {
                 text: newImageTitle,
-                image: downloadURL,
-                storagePath: snapshot.metadata.fullPath,
+                image: updatedImageBase64, // Storing Base64 string
                 createdAt: new Date()
             });
 
@@ -66,7 +97,7 @@ const AdminGallery = () => {
             setPreviewUrl('');
         } catch (error) {
             console.error("Error uploading image:", error);
-            alert("Failed to upload image. Please try again.");
+            alert(error.message || "Failed to upload image. Please try again.");
         } finally {
             setIsUploading(false);
         }
@@ -76,14 +107,8 @@ const AdminGallery = () => {
         if (!window.confirm("Are you sure you want to delete this image?")) return;
 
         try {
-            // 1. Delete from Firestore
+            // Delete from Firestore only
             await deleteDoc(doc(db, "gallery", image.id));
-
-            // 2. Delete from Storage (if path exists)
-            if (image.storagePath) {
-                const storageRef = ref(storage, image.storagePath);
-                await deleteObject(storageRef);
-            }
         } catch (error) {
             console.error("Error deleting image:", error);
             alert("Failed to delete image.");
