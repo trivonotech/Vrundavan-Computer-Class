@@ -8,9 +8,7 @@ const AdminSecurity = () => {
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState({
         spamProtection: true,
-        botProtection: true,
         maxRequestsPerMinute: 5,
-        maxPageViewsPerMinute: 60,
         blockDurationMinutes: 30,
         strictMode: false
     });
@@ -110,11 +108,11 @@ const AdminSecurity = () => {
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex items-center gap-3 mb-4 text-slate-800 font-semibold">
                             <Activity size={18} className="text-blue-500" />
-                            Form & Traffic Limits
+                            Rate Limiting
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-sm text-slate-600 block mb-2">Max Form Submissions / Minute</label>
+                                <label className="text-sm text-slate-600 block mb-2">Max Requests / Minute</label>
                                 <input
                                     type="number"
                                     min="1"
@@ -123,34 +121,7 @@ const AdminSecurity = () => {
                                     onChange={e => setSettings({ ...settings, maxRequestsPerMinute: parseInt(e.target.value) })}
                                     className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono"
                                 />
-                                <p className="text-xs text-slate-400 mt-2">Limit for Contact Form messages.</p>
-                            </div>
-                            <div className="pt-4 border-t border-slate-100">
-                                <label className="text-sm text-slate-600 block mb-2">Max Page Views / Minute (Bot Check)</label>
-                                <input
-                                    type="number"
-                                    min="10"
-                                    max="500"
-                                    value={settings.maxPageViewsPerMinute || 60}
-                                    onChange={e => setSettings({ ...settings, maxPageViewsPerMinute: parseInt(e.target.value) })}
-                                    className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono"
-                                />
-                                <p className="text-xs text-slate-400 mt-2">If a user visits pages faster than this, they will be blocked.</p>
-                            </div>
-                            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <label className="text-sm text-slate-600 block">Strict Bot Filtering</label>
-                                    <p className="text-xs text-slate-400">Block known bot User-Agents</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.botProtection}
-                                        onChange={e => setSettings({ ...settings, botProtection: e.target.checked })}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                                <p className="text-xs text-slate-400 mt-2">How many times a user can submit forms per minute.</p>
                             </div>
                         </div>
                     </div>

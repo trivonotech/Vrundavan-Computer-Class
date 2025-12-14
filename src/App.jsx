@@ -44,9 +44,8 @@ function App() {
             <Route path="/team-management" element={<TeamManagement />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/access-denied" element={<AccessDenied />} />
           </Route>
-
-          <Route path="/access-denied" element={<AccessDenied />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<Login />} />

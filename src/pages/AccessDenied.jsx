@@ -1,63 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, AlertTriangle, Ban } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 
 const AccessDenied = () => {
-    const [timeLeft, setTimeLeft] = useState(null); // Init null to show loading or blocking state
+    const [timeLeft, setTimeLeft] = useState(1600); // ~26 mins in seconds
 
     useEffect(() => {
-        const handleBlockLogic = async () => {
-            const now = Date.now();
-            const storedEndTime = localStorage.getItem('access_block_until');
-
-            // 1. Check if an active block already exists
-            if (storedEndTime && parseInt(storedEndTime) > now) {
-                setTimeLeft(Math.ceil((parseInt(storedEndTime) - now) / 1000));
-                return;
-            }
-
-            // 2. If no active block, fetch settings and create one
-            try {
-                const docRef = doc(db, "settings", "security");
-                const docSnap = await getDoc(docRef);
-                const durationMinutes = (docSnap.exists() && docSnap.data().blockDurationMinutes)
-                    ? docSnap.data().blockDurationMinutes
-                    : 30; // Default 30 mins
-
-                const newEndTime = now + (durationMinutes * 60 * 1000);
-                localStorage.setItem('access_block_until', newEndTime.toString());
-                setTimeLeft(durationMinutes * 60);
-            } catch (error) {
-                console.error("Error init block:", error);
-                // Fallback default
-                const newEndTime = now + (30 * 60 * 1000);
-                localStorage.setItem('access_block_until', newEndTime.toString());
-                setTimeLeft(30 * 60);
-            }
-        };
-
-        handleBlockLogic();
-
         const timer = setInterval(() => {
-            const storedEndTime = localStorage.getItem('access_block_until');
-            if (storedEndTime) {
-                const remaining = Math.ceil((parseInt(storedEndTime) - Date.now()) / 1000);
-                if (remaining <= 0) {
-                    localStorage.removeItem('access_block_until');
-                    setTimeLeft(0);
-                    // Optionally redirect home here if we wanted auto-unblock
-                } else {
-                    setTimeLeft(remaining);
-                }
-            }
+            setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
         }, 1000);
-
         return () => clearInterval(timer);
     }, []);
-
-    if (timeLeft === null) return null; // Avoid flash
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -66,49 +19,45 @@ const AccessDenied = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-mono text-center relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/40 via-transparent to-transparent"></div>
-            </div>
-
-            <div className="max-w-xl w-full relative z-10">
+        <div className="min-h-screen bg-[#380e0e] flex items-center justify-center p-4 font-mono text-center">
+            <div className="max-w-xl w-full">
                 {/* Shield Icon */}
-                <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-8 ring-4 ring-red-500/20 animate-pulse">
-                    <ShieldAlert className="text-red-500" size={48} />
+                <div className="w-24 h-24 bg-[#5c1c1c] rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse">
+                    <ShieldAlert className="text-[#ff4444]" size={48} />
                 </div>
 
-                <h1 className="text-5xl md:text-6xl font-black text-white mb-2 tracking-tighter uppercase">
-                    Access <span className="text-red-500">Denied</span>
+                <h1 className="text-5xl md:text-6xl font-black text-[#ff4444] mb-8 tracking-tighter uppercase">
+                    Access Denied
                 </h1>
-                <p className="text-slate-400 mb-8 uppercase tracking-widest text-xs font-bold">Error 403 • Forbidden</p>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-red-900"></div>
+                <div className="bg-[#2a0a0a] border border-[#5c1c1c] rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff4444] to-[#990000]"></div>
 
-                    <h2 className="text-white font-bold text-xl mb-3 flex items-center justify-center gap-2">
-                        <AlertTriangle size={20} className="text-amber-500" />
-                        Security Firewall Activated
+                    <h2 className="text-white font-bold text-xl mb-2 flex items-center justify-center gap-2">
+                        <AlertTriangle size={20} className="text-[#ff4444]" />
+                        System Protective Firewall Activated
                     </h2>
 
-                    <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
-                        Our systems have detected unusual traffic patterns from your IP address.
+                    <p className="text-[#ffaaaa] text-sm mb-6">
+                        High Rate Traffic / Spamming Detected from your IP
                     </p>
 
-                    <div className="bg-slate-950/50 rounded-lg py-4 px-6 mb-2 inline-flex items-center gap-4 border border-slate-800">
-                        <Ban size={20} className="text-red-500" />
-                        <div className="text-left">
-                            <p className="text-xs text-slate-500 uppercase font-semibold">Temporary Block</p>
-                            <span className="text-white font-mono text-lg font-bold tracking-wider">
-                                {formatTime(timeLeft)}
-                            </span>
-                        </div>
+                    <div className="bg-[#1a0505] rounded-lg py-3 px-4 mb-2 inline-flex items-center gap-3 border border-[#3d1212]">
+                        <Ban size={16} className="text-[#ff4444]" />
+                        <span className="text-[#ff4444] text-sm font-semibold tracking-wider">
+                            IP Block Active for: <span className="text-white">{formatTime(timeLeft)}</span>
+                        </span>
                     </div>
                 </div>
 
-                <p className="text-slate-500 text-xs mt-8 max-w-sm mx-auto leading-relaxed">
-                    This action is reversible automatically. Please wait for the timer to expire.
+                <p className="text-[#884444] text-xs mt-8 max-w-sm mx-auto leading-relaxed">
+                    Your actions triggered our automated defense system. Please stop rapid refreshing or automated requests.
                 </p>
+
+                {/* Hidden Home Link for legitimate users who got stuck */}
+                <div className="mt-12 opacity-20 hover:opacity-100 transition-opacity">
+                    <Link to="/" className="text-[#ff4444] text-xs underline">Return to Home</Link>
+                </div>
             </div>
         </div>
     );
