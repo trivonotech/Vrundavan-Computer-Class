@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Shield, ShieldAlert, Clock, AlertTriangle, CheckCircle, Info, Lock } from 'lucide-react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Save, Shield, ShieldAlert, Clock, AlertTriangle, CheckCircle, Info, Lock, Clipboard } from 'lucide-react';
+import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const AdminSecurity = () => {
@@ -260,6 +260,134 @@ const AdminSecurity = () => {
                     </button>
                 </div>
             </form>
+
+            {/* Security Audit Log */}
+            <SecurityAuditLog settings={settings} />
+        </div>
+    );
+};
+
+const SecurityAuditLog = ({ settings }) => {
+    const [logs, setLogs] = useState([]);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        // 1. Live Configuration Weakness Analysis (Computed)
+        const analyzeWeaknesses = () => {
+            const computedLogs = [];
+            const addWeakness = (level, message) => {
+                computedLogs.push({
+                    id: `weakness-${Math.random()}`,
+                    timestamp: new Date().toISOString(), // Always "now" for active issues
+                    level,
+                    message,
+                    type: 'active_alert' // To distinguish from historical events
+                });
+            };
+
+            if (!settings.enabled) {
+                addWeakness('CRITICAL', 'SECURITY SHIELD IS DISABLED. System is vulnerable.');
+            }
+            if (settings.lockdown) {
+                addWeakness('WARN', 'System Lockdown is ACTIVE. Public access restricted.');
+            }
+            if (settings.maxReloads > 10) {
+                addWeakness('WARN', `Weak Config: "Max Reloads" (${settings.maxReloads}) is too high.`);
+            }
+            if (settings.timeWindow < 5) {
+                addWeakness('WARN', `Weak Config: "Time Window" (${settings.timeWindow}s) is too short.`);
+            }
+            if (settings.blockDuration < 5) {
+                addWeakness('WARN', `Weak Config: "Block Duration" (${settings.blockDuration}m) is too short.`);
+            }
+            if (window.location.protocol !== 'https:') {
+                addWeakness('ERROR', 'Insecure Connection: Not using HTTPS.');
+            }
+
+            return computedLogs;
+        };
+
+        // 2. Persistent Event Logs (From Firestore)
+        const q = query(collection(db, "security_logs"), orderBy("timestamp", "desc"), limit(20));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const historyLogs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString()
+            }));
+
+            // Merge Active Weaknesses + History
+            const activeWeaknesses = analyzeWeaknesses();
+            const combined = [...activeWeaknesses, ...historyLogs];
+
+            // Slice to requested limit (last 10)
+            setLogs(combined.slice(0, 10));
+        });
+
+        return () => unsubscribe();
+    }, [settings]);
+
+    if (logs.length === 0) return null;
+
+    return (
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl mt-8">
+            <div className="bg-slate-950 px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                    <ShieldAlert className="text-blue-500" size={20} />
+                    <h3 className="text-slate-200 font-bold font-mono tracking-wider">SYSTEM_SECURITY_LOG</h3>
+                </div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    Live Monitor
+                </div>
+            </div>
+
+            <div className="p-0 font-mono text-sm max-h-[400px] overflow-y-auto custom-scrollbar bg-slate-900/50">
+                {logs.map((log, index) => (
+                    <LogItem key={log.id} log={log} isEven={index % 2 === 0} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const LogItem = ({ log, isEven }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        const text = `[${log.timestamp}] [${log.level}] ${log.message}`;
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <div className={`flex items-start justify-between gap-4 p-4 hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0 ${isEven ? 'bg-slate-900' : 'bg-slate-900/50'}`}>
+            <div className="flex gap-4 items-start">
+                <span className="text-slate-500 shrink-0 select-none text-xs flex items-center pt-1">
+                    {new Date(log.timestamp).toLocaleTimeString()}
+                </span>
+                <div className="flex flex-col gap-1 w-full">
+                    <span className={`font-bold text-xs uppercase tracking-wider ${log.level === 'CRITICAL' ? 'text-red-500' :
+                            log.level === 'ERROR' ? 'text-red-400' :
+                                log.level === 'WARN' ? 'text-amber-500' :
+                                    log.level === 'SUCCESS' ? 'text-green-500' :
+                                        'text-blue-400'
+                        }`}>
+                        {log.level}
+                    </span>
+                    <span className="text-slate-300 leading-relaxed">
+                        {log.message}
+                    </span>
+                </div>
+            </div>
+            <button
+                onClick={handleCopy}
+                className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-800"
+                title="Copy Entry"
+            >
+                {copied ? <CheckCircle size={14} className="text-green-500" /> : <Clipboard size={14} />}
+            </button>
         </div>
     );
 };
