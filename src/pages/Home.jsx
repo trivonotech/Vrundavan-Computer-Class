@@ -103,7 +103,7 @@ const Home = () => {
                     </div>
 
                 </div>
-                <div className="absolute bottom-0 right-0 hidden md:block w-[45%] lg:w-[40%] xl:w-[35%] h-auto max-h-[90%] z-0 pointer-events-none">
+                <div className="absolute bottom-0 right-12 hidden md:block w-[45%] lg:w-[40%] xl:w-[35%] h-auto max-h-[90%] z-0 pointer-events-none">
                     <img
                         src="/assets/image-from-rawpixel-id-15542696-png.webp"
                         alt="Student"
