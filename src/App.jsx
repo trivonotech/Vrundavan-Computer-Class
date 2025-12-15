@@ -3,13 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import SecurityMonitor from './components/SecurityMonitor';
+import Home from './pages/Home'; // Eager load Home
+import Courses from './pages/Courses';
+import TeamManagement from './pages/TeamManagement';
+import Gallery from './pages/Gallery';
+import Contact from './pages/Contact';
 
-// Lazy load pages
-const Home = lazy(() => import('./pages/Home'));
-const Courses = lazy(() => import('./pages/Courses'));
-const TeamManagement = lazy(() => import('./pages/TeamManagement'));
-const Gallery = lazy(() => import('./pages/Gallery'));
-const Contact = lazy(() => import('./pages/Contact'));
+
+
+// Lazy load pages - only generic ones
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Lazy load Admin pages

@@ -332,16 +332,19 @@ const Home = () => {
                         Take a glimpse into the vibrant life at SkillNest. Our gallery showcases events, classrooms, and student activities.
                     </p>
                     <div style={{ height: '350px', position: 'relative', marginTop: '-30px', marginBottom: '-80px' }}>
-                        <CircularGallery
-                            items={galleryItems.length > 0 ? galleryItems : undefined}
-                            bend={0.5}
-                            textColor="#ffffff"
-                            borderRadius={0.05}
-                            scrollSpeed={1}
-                            scrollEase={0.05}
-                            planeScale={1}
-                            yOffset={1.0}
-                        />    </div>
+                        {galleryItems.length > 0 && (
+                            <CircularGallery
+                                items={galleryItems}
+                                bend={0.5}
+                                textColor="#ffffff"
+                                borderRadius={0.05}
+                                scrollSpeed={1}
+                                scrollEase={0.05}
+                                planeScale={1}
+                                yOffset={1.0}
+                            />
+                        )}
+                    </div>
                     <Link to="/gallery" className="relative z-10 inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-medium transition-colors">
                         View Full Gallery
                     </Link>
