@@ -256,7 +256,7 @@ const AdminCourses = () => {
                             </div>
                             <div className="p-5 flex-1 flex flex-col">
                                 <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1">{course.title}</h3>
-                                <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-1">{course.description}</p>
+                                <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-1">{course.fullDescription}</p>
 
                                 <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-50">
                                     <button
