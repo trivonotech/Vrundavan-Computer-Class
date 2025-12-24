@@ -6,6 +6,39 @@ import { collection, getDocs, query, orderBy, limit, doc, getDoc, where } from '
 import { db } from "../firebase";
 
 const Home = () => {
+    const [activeSlide, setActiveSlide] = React.useState(0);
+    const scrollRef = React.useRef(null);
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const { scrollLeft, offsetWidth } = scrollRef.current;
+            const scrollProgress = scrollLeft / offsetWidth;
+            // Round to nearest index
+            const index = Math.round(scrollProgress);
+            // Ensure index is within bounds (0-2) and update only if changed
+            if (index !== activeSlide && index >= 0 && index <= 2) {
+                setActiveSlide(index);
+            }
+        }
+    };
+
+    const scrollToSlide = (index) => {
+        if (scrollRef.current) {
+            // Dynamically calculate scroll position based on first card width
+            // This works for both fixed width and full width cards
+            const firstCard = scrollRef.current.children[0];
+            const cardWidth = firstCard ? firstCard.offsetWidth : 0;
+            const gap = 16; // gap-4 is 1rem = 16px
+
+            const scrollAmount = index * (cardWidth + gap);
+
+            scrollRef.current.scrollTo({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     const [stats, setStats] = useState({
         experience: '21+',
         events: '150+',
@@ -120,9 +153,14 @@ const Home = () => {
 
                 {/* Courses Preview */}
                 {/* Courses Section - Premium Cards */}
-                <section id="courses" className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <section
+                    id="courses"
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                    className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-4 md:gap-8 pb-8 pt-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide mt-8 md:mt-12 md:overflow-visible"
+                >
                     {/* Computer Basic */}
-                    <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-500 hover:-translate-y-2 relative overflow-hidden">
+                    <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-500 hover:-translate-y-2 relative overflow-hidden min-w-full md:min-w-0 snap-center">
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                             <LayoutGrid size={100} className="text-blue-500 transform rotate-12" />
                         </div>
@@ -141,7 +179,7 @@ const Home = () => {
                     </div>
 
                     {/* Govt. Approved CCC */}
-                    <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-purple-500 hover:-translate-y-2 relative overflow-hidden">
+                    <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-purple-500 hover:-translate-y-2 relative overflow-hidden min-w-full md:min-w-0 snap-center">
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Laptop size={100} className="text-purple-500 transform rotate-12" />
                         </div>
@@ -160,7 +198,7 @@ const Home = () => {
                     </div>
 
                     {/* Tally Prime */}
-                    <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-orange-500 hover:-translate-y-2 relative overflow-hidden">
+                    <div className="group bg-white rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-t-4 border-orange-500 hover:-translate-y-2 relative overflow-hidden min-w-full md:min-w-0 snap-center">
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Calculator size={100} className="text-orange-500 transform rotate-12" />
                         </div>
@@ -178,6 +216,18 @@ const Home = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Mobile Pagination Dots */}
+                <div className="flex justify-center gap-2 mb-8 md:hidden">
+                    {[0, 1, 2].map((index) => (
+                        <button
+                            key={index}
+                            onClick={() => scrollToSlide(index)}
+                            className={`h-2 rounded-full transition-all duration-300 ${activeSlide === index ? 'w-8 bg-blue-600' : 'w-2 bg-blue-200'}`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
 
                 {/* Management Preview */}
                 <section className="grid md:grid-cols-2 gap-12 items-center bg-white/90 rounded-3xl p-8 md:p-12 shadow-sm">
