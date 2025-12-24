@@ -8,6 +8,7 @@ import Courses from './pages/Courses';
 import TeamManagement from './pages/TeamManagement';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
+import CourseDetails from './pages/CourseDetails';
 
 
 
@@ -46,6 +47,7 @@ function App() {
             <Route element={<Layout><Outlet /></Layout>}>
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses />} />
+              <Route path="/courses/:courseId" element={<CourseDetails />} />
               <Route path="/team-management" element={<TeamManagement />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/contact" element={<Contact />} />

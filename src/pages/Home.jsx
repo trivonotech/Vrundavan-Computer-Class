@@ -39,6 +39,41 @@ const Home = () => {
         }
     };
 
+    const [activeGallerySlide, setActiveGallerySlide] = React.useState(0);
+    const galleryScrollRef = React.useRef(null);
+
+    const handleGalleryScroll = () => {
+        if (galleryScrollRef.current) {
+            const { scrollLeft, offsetWidth } = galleryScrollRef.current;
+            const scrollProgress = scrollLeft / offsetWidth; // Approximate index based on full-width scrolling
+
+            // Since cards are 80vw, we might need slightly more precise calculation if we want exact index
+            // But usually scrollLeft / cardWidth is better.
+            // Let's rely on scrollLeft / (cardWidth + gap)
+            const firstChild = galleryScrollRef.current.children[0];
+            if (firstChild) {
+                const cardWidth = firstChild.offsetWidth;
+                const gap = 16;
+                const index = Math.round(scrollLeft / (cardWidth + gap));
+                setActiveGallerySlide(index);
+            }
+        }
+    };
+
+    const scrollToGallerySlide = (index) => {
+        if (galleryScrollRef.current) {
+            const firstChild = galleryScrollRef.current.children[0];
+            if (firstChild) {
+                const cardWidth = firstChild.offsetWidth;
+                const gap = 16;
+                galleryScrollRef.current.scrollTo({
+                    left: index * (cardWidth + gap),
+                    behavior: 'smooth'
+                });
+            }
+        }
+    };
+
     const [stats, setStats] = useState({
         experience: '21+',
         events: '150+',
@@ -373,7 +408,7 @@ const Home = () => {
                 </section>
 
                 {/* Gallery Preview */}
-                <section className="bg-slate-900 rounded-3xl p-8 md:p-12 text-white text-center space-y-8">
+                <section className="bg-slate-900 rounded-3xl p-8 md:p-8 text-white text-center space-y-2">
                     <div className="flex items-center justify-center gap-4">
                         <div className="p-3 rounded-xl bg-white/10 text-white"><ImageIcon size={24} /></div>
                         <h2 className="text-3xl font-bold">Campus Life Gallery</h2>
@@ -381,41 +416,55 @@ const Home = () => {
                     <p className="text-slate-300 max-w-2xl mx-auto">
                         Take a glimpse into the vibrant life at SkillNest. Our gallery showcases events, classrooms, and student activities.
                     </p>
-                    <div className="relative -mt-8 md:-mb-20">
-                        {/* Desktop: 3D Gallery */}
-                        <div className="hidden md:block h-[350px] relative">
-                            {galleryItems.length > 0 && (
-                                <CircularGallery
-                                    items={galleryItems}
-                                    bend={0.5}
-                                    textColor="#ffffff"
-                                    borderRadius={0.05}
-                                    scrollSpeed={1}
-                                    scrollEase={0.05}
-                                    planeScale={1}
-                                    yOffset={1.0}
-                                />
-                            )}
-                        </div>
+                    {/* Desktop: 3D Gallery */}
+                    <div className="hidden md:block relative h-[300px] -mt-8 -mb-28">
+                        {galleryItems.length > 0 && (
+                            <CircularGallery
+                                items={galleryItems}
+                                bend={0.5}
+                                textColor="#ffffff"
+                                borderRadius={0.05}
+                                scrollSpeed={1}
+                                scrollEase={0.05}
+                                planeScale={1}
+                                yOffset={1.0}
+                            />
+                        )}
+                    </div>
 
-                        {/* Mobile: Horizontal Scroll Gallery */}
-                        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 -mx-4 scrollbar-hide">
-                            {galleryItems.slice(0, 8).map((item, index) => (
-                                <div key={index} className="flex-none w-[85vw] snap-center aspect-[4/5] relative rounded-2xl overflow-hidden shadow-lg">
-                                    <img
-                                        src={item.image}
-                                        alt={item.text || "Gallery image"}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-                                        <p className="text-white font-medium text-lg leading-tight line-clamp-2">
-                                            {item.text}
-                                        </p>
-                                    </div>
+                    {/* Mobile: Horizontal Scroll Gallery */}
+                    <div
+                        ref={galleryScrollRef}
+                        onScroll={handleGalleryScroll}
+                        className="md:hidden relative -mt-8 flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 -mx-4 scrollbar-hide"
+                    >
+                        {galleryItems.slice(0, 8).map((item, index) => (
+                            <div key={index} className="flex-none w-[80vw] snap-center aspect-[3/2] relative rounded-2xl overflow-hidden shadow-lg">
+                                <img
+                                    src={item.image}
+                                    alt={item.text || "Gallery image"}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
+                                    <p className="text-white font-medium text-base leading-tight line-clamp-2">
+                                        {item.text}
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Mobile Gallery Dots */}
+                    <div className="flex md:hidden justify-center gap-2 -mt-4 mb-8">
+                        {galleryItems.slice(0, 8).map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => scrollToGallerySlide(index)}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${activeGallerySlide === index ? 'w-6 bg-blue-500' : 'w-1.5 bg-slate-600'}`}
+                                aria-label={`Go to gallery item ${index + 1}`}
+                            />
+                        ))}
                     </div>
                     <Link to="/gallery" className="relative z-10 inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-medium transition-colors">
                         View Full Gallery

@@ -1,35 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
-import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { coursesData } from '../data/courses';
 
 const Courses = () => {
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
-                const snapshot = await getDocs(q);
-                const courseData = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setCourses(courseData);
-            } catch (error) {
-                console.error("Error fetching courses:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCourses();
-    }, []);
-
-    if (loading) {
-        return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
-    }
+    // In future we can merge this with Firebase data if needed
+    const [courses, setCourses] = useState(coursesData);
 
     return (
         <div className="min-h-screen py-12">
@@ -39,29 +14,39 @@ const Courses = () => {
                     <p className="text-lg text-slate-600 max-w-2xl mx-auto">Explore our diverse range of courses designed to empower you with the skills needed for today's competitive world.</p>
                 </div>
 
-                {courses.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-                        {courses.map((course) => (
-                            <div key={course.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-slate-100 flex flex-col h-full">
-                                <img src={course.image} alt={course.title} className="w-full h-32 md:h-48 object-cover" />
-                                <div className="p-4 md:p-6 flex-1 flex flex-col">
-                                    <span className="text-[10px] md:text-xs font-semibold text-blue-600 bg-blue-50 px-2 md:px-3 py-1 rounded-full w-fit">{course.category}</span>
-                                    <h3 className="text-sm md:text-xl font-bold text-slate-900 mt-2 md:mt-3 mb-1 md:mb-2 line-clamp-2 leading-tight">{course.title}</h3>
-                                    <p className="text-slate-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">{course.description}</p>
-                                    <div className="mt-auto pt-2">
-                                        <button className="w-full py-1.5 md:py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-xs md:text-base font-medium transition-colors">
-                                            Learn More
-                                        </button>
-                                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {courses.map((course) => (
+                        <div key={course.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full group">
+                            <div className="relative overflow-hidden h-48">
+                                <img
+                                    src={course.image}
+                                    alt={course.title}
+                                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                            </div>
+                            <div className="p-6 flex-1 flex flex-col">
+                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit mb-3">
+                                    {course.category}
+                                </span>
+                                <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                    {course.title}
+                                </h3>
+                                <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
+                                    {course.shortDescription}
+                                </p>
+                                <div className="mt-auto">
+                                    <Link
+                                        to={`/courses/${course.id}`}
+                                        className="w-full block text-center py-2.5 border border-blue-600 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white font-medium transition-all duration-300"
+                                    >
+                                        Learn More
+                                    </Link>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-slate-50 rounded-3xl">
-                        <p className="text-slate-500 text-lg">No courses available at the moment. Please check back later.</p>
-                    </div>
-                )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
