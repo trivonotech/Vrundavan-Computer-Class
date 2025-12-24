@@ -59,7 +59,7 @@ const Courses = () => {
                                     {course.title}
                                 </h3>
                                 <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
-                                    {course.shortDescription}
+                                    {course.fullDescription || course.description || course.shortDescription}
                                 </p>
                                 <div className="mt-auto">
                                     <Link

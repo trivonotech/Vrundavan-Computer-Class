@@ -65,8 +65,7 @@ const AdminCourses = () => {
     // Form State
     const initialFormState = {
         title: '',
-        category: 'Technology',
-        description: '', // Short description
+        category: '',
         fullDescription: '',
         whyChoose: '',
         objective: '',
@@ -145,8 +144,7 @@ const AdminCourses = () => {
             setEditingCourse(course);
             setFormData({
                 title: course.title || '',
-                category: course.category || 'Technology',
-                description: course.description || '', // Short
+                category: course.category || '',
                 fullDescription: course.fullDescription || '',
                 whyChoose: course.whyChoose || '',
                 objective: course.objective || '',
@@ -383,12 +381,13 @@ const AdminCourses = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Category (Optional)</label>
                                             <select
                                                 value={formData.category}
                                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                                             >
+                                                <option value="">Select Category</option>
                                                 <option>Technology</option>
                                                 <option>Accounting & Finance</option>
                                                 <option>Communication Skills</option>
@@ -423,18 +422,6 @@ const AdminCourses = () => {
                             </div>
 
                             <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Short Description (Card View)</label>
-                                    <textarea
-                                        rows="2"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Brief summary for the course card..."
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                                        required
-                                    ></textarea>
-                                </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Full Description (Detail Page)</label>
                                     <textarea

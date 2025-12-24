@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Users, BookOpen, Target, Award, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Users, BookOpen, Target, Award, Loader2, Clock, Banknote } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -50,7 +50,7 @@ const CourseDetails = () => {
     return (
         <div className="min-h-screen bg-slate-50 pt-24 pb-12">
             {/* Hero Section */}
-            <div className="bg-white border-b border-slate-100">
+            <div>
                 <div className="max-w-screen-xl mx-auto px-4 py-8 md:py-12">
                     <Link to="/courses" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-6 transition-colors">
                         <ArrowLeft size={18} className="mr-2" />
@@ -59,9 +59,21 @@ const CourseDetails = () => {
 
                     <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
                         <div>
-                            <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-sm font-semibold rounded-full mb-4">
-                                {course.category}
-                            </span>
+                            <div className="flex flex-wrap gap-3 mb-4">
+                                <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-sm font-semibold rounded-full">
+                                    {course.category}
+                                </span>
+                                {course.duration && (
+                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-600 text-sm font-semibold rounded-full">
+                                        <Clock size={14} /> {course.duration}
+                                    </span>
+                                )}
+                                {course.fees && (
+                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-600 text-sm font-semibold rounded-full">
+                                        <Banknote size={14} /> {course.fees}
+                                    </span>
+                                )}
+                            </div>
                             <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 leading-tight">
                                 {course.title}
                             </h1>
