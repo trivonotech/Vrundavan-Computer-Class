@@ -381,19 +381,41 @@ const Home = () => {
                     <p className="text-slate-300 max-w-2xl mx-auto">
                         Take a glimpse into the vibrant life at SkillNest. Our gallery showcases events, classrooms, and student activities.
                     </p>
-                    <div style={{ height: '350px', position: 'relative', marginTop: '-30px', marginBottom: '-80px' }}>
-                        {galleryItems.length > 0 && (
-                            <CircularGallery
-                                items={galleryItems}
-                                bend={0.5}
-                                textColor="#ffffff"
-                                borderRadius={0.05}
-                                scrollSpeed={1}
-                                scrollEase={0.05}
-                                planeScale={1}
-                                yOffset={1.0}
-                            />
-                        )}
+                    <div className="relative -mt-8 md:-mb-20">
+                        {/* Desktop: 3D Gallery */}
+                        <div className="hidden md:block h-[350px] relative">
+                            {galleryItems.length > 0 && (
+                                <CircularGallery
+                                    items={galleryItems}
+                                    bend={0.5}
+                                    textColor="#ffffff"
+                                    borderRadius={0.05}
+                                    scrollSpeed={1}
+                                    scrollEase={0.05}
+                                    planeScale={1}
+                                    yOffset={1.0}
+                                />
+                            )}
+                        </div>
+
+                        {/* Mobile: Horizontal Scroll Gallery */}
+                        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 -mx-4 scrollbar-hide">
+                            {galleryItems.slice(0, 8).map((item, index) => (
+                                <div key={index} className="flex-none w-[85vw] snap-center aspect-[4/5] relative rounded-2xl overflow-hidden shadow-lg">
+                                    <img
+                                        src={item.image}
+                                        alt={item.text || "Gallery image"}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                                        <p className="text-white font-medium text-lg leading-tight line-clamp-2">
+                                            {item.text}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <Link to="/gallery" className="relative z-10 inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-medium transition-colors">
                         View Full Gallery
