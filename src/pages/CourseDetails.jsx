@@ -120,15 +120,15 @@ const CourseDetails = () => {
 
                         {/* What You Will Learn */}
                         {course.whatLearn && course.whatLearn.length > 0 && (
-                            <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                                <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                            <section className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
+                                <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
                                     <BookOpen className="text-blue-600" />
                                     What Will You Learn?
                                 </h2>
-                                <div className="grid sm:grid-cols-2 gap-4">
+                                <div className="grid sm:grid-cols-2 gap-3">
                                     {course.whatLearn.map((item, index) => (
                                         item && (
-                                            <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                                            <div key={index} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
                                                 <div className="mt-1 min-w-[20px]">
                                                     <CheckCircle2 size={20} className="text-green-500" />
                                                 </div>
