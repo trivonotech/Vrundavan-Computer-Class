@@ -272,7 +272,7 @@ const Home = () => {
                         <p className="text-slate-600">
                             Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind SkillNest.
                         </p>
-                        <Link to="/management" className="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700">
+                        <Link to="/team-management" className="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700">
                             Meet the Leaders <ArrowRight size={20} className="ml-2" />
                         </Link>
                     </div>
@@ -487,7 +487,7 @@ const Home = () => {
                         <p className="text-slate-600">
                             Our faculty comprises industry experts and passionate educators committed to your success. Get to know the people who will guide your journey.
                         </p>
-                        <Link to="/team" className="inline-flex items-center text-green-600 font-semibold hover:text-green-700">
+                        <Link to="/team-management" className="inline-flex items-center text-green-600 font-semibold hover:text-green-700">
                             See All Members <ArrowRight size={20} className="ml-2" />
                         </Link>
                     </div>

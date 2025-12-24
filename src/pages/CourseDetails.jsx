@@ -48,7 +48,7 @@ const CourseDetails = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-24 pb-12">
+        <div className="min-h-screen pt-24 pb-12">
             {/* Hero Section */}
             <div>
                 <div className="max-w-screen-xl mx-auto px-4 py-8 md:py-12">
@@ -183,7 +183,7 @@ const CourseDetails = () => {
 
                         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white text-center">
                             <h3 className="text-xl font-bold mb-2">Ready to Start?</h3>
-                            <p className="mb-6 opacity-90 text-sm">Join us today and boost your career with practical sills.</p>
+                            <p className="mb-6 opacity-90 text-sm">Join us today and boost your career with practical skills.</p>
                             <Link to="/contact" className="inline-block w-full bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
                                 Enquire Now
                             </Link>

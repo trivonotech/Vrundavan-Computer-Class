@@ -8,9 +8,9 @@ const Footer = () => {
             <div className="max-w-screen-xl mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
-                        <h3 className="text-2xl font-bold mb-4">SKILLNEST</h3>
+                        <h3 className="text-2xl font-bold mb-4">VRUNDAVAN</h3>
                         <p className="text-slate-400 text-sm">
-                            Shaping minds and building futures through smarter learning. Join us to achieve your goals.
+                            Empowering students with practical computer education and skills for a better future.
                         </p>
                     </div>
                     <div>
@@ -26,9 +26,9 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
                         <ul className="space-y-2 text-slate-400 text-sm">
-                            <li className="flex items-center gap-2"><Phone size={16} /> +1 234 567 890</li>
-                            <li className="flex items-center gap-2"><Mail size={16} /> info@skillnest.com</li>
-                            <li className="flex items-center gap-2"><MapPin size={16} /> 123 Education St, Knowledge City</li>
+                            <li className="flex items-center gap-2"><Phone size={16} /> +91 98765 43210</li>
+                            <li className="flex items-center gap-2"><Mail size={16} /> info@vrundavan.com</li>
+                            <li className="flex items-center gap-2"><MapPin size={16} /> Keshod, Gujarat</li>
                         </ul>
                     </div>
                     <div>
@@ -42,7 +42,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="border-t border-slate-800 mt-8 pt-6 text-center text-slate-500 text-sm">
-                    © {new Date().getFullYear()} SkillNest. All rights reserved.
+                    © {new Date().getFullYear()} Vrundavan Computers. All rights reserved.
                 </div>
             </div>
         </footer>
