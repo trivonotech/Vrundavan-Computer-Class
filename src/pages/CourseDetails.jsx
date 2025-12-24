@@ -1,14 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Users, BookOpen, Target, Award } from 'lucide-react';
-import { coursesData } from '../data/courses';
+import { ArrowLeft, CheckCircle2, Users, BookOpen, Target, Award, Loader2 } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const CourseDetails = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
+    const [course, setCourse] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Find the course from the static data
-    const course = coursesData.find(c => c.id === courseId);
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const docRef = doc(db, "courses", courseId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setCourse({ ...docSnap.data(), id: docSnap.id });
+                } else {
+                    setCourse(null); // Course not found
+                }
+            } catch (error) {
+                console.error("Error fetching course details:", error);
+                setCourse(null); // Ensure course is null on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourse();
+    }, [courseId]);
+
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    }
 
     if (!course) {
         return (
@@ -81,55 +107,67 @@ const CourseDetails = () => {
                         </section>
 
                         {/* What You Will Learn */}
-                        <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                                <BookOpen className="text-blue-600" />
-                                What Will You Learn?
-                            </h2>
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                {course.whatLearn.map((item, index) => (
-                                    <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                                        <div className="mt-1 min-w-[20px]">
-                                            <CheckCircle2 size={20} className="text-green-500" />
-                                        </div>
-                                        <span className="text-slate-700 font-medium">{item}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+                        {course.whatLearn && course.whatLearn.length > 0 && (
+                            <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                                <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                                    <BookOpen className="text-blue-600" />
+                                    What Will You Learn?
+                                </h2>
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    {course.whatLearn.map((item, index) => (
+                                        item && (
+                                            <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                                                <div className="mt-1 min-w-[20px]">
+                                                    <CheckCircle2 size={20} className="text-green-500" />
+                                                </div>
+                                                <span className="text-slate-700 font-medium">{item}</span>
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                     </div>
 
                     {/* Sidebar */}
                     <div className="space-y-8">
                         {/* Why Vrundavan */}
-                        <div className="bg-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-xl">
-                            <h3 className="text-xl font-bold mb-6">Why Vrundavan Computers?</h3>
-                            <ul className="space-y-4">
-                                {course.whyUs.map((item, index) => (
-                                    <li key={index} className="flex items-start gap-3 opacity-90">
-                                        <CheckCircle2 size={18} className="text-blue-400 mt-1 shrink-0" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {course.whyUs && course.whyUs.length > 0 && (
+                            <div className="bg-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-xl">
+                                <h3 className="text-xl font-bold mb-6">Why Vrundavan Computers?</h3>
+                                <ul className="space-y-4">
+                                    {course.whyUs.map((item, index) => (
+                                        item && (
+                                            <li key={index} className="flex items-start gap-3 opacity-90">
+                                                <CheckCircle2 size={18} className="text-blue-400 mt-1 shrink-0" />
+                                                <span>{item}</span>
+                                            </li>
+                                        )
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Who Should Enroll */}
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100">
-                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                <Users className="text-blue-600" />
-                                Who Should Enroll?
-                            </h3>
-                            <ul className="space-y-3">
-                                {course.whoEnroll.map((item, index) => (
-                                    <li key={index} className="flex items-center gap-3 text-slate-600">
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {course.whoEnroll && course.whoEnroll.length > 0 && (
+                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100">
+                                <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                    <Users className="text-blue-600" />
+                                    Who Should Enroll?
+                                </h3>
+                                <ul className="space-y-3">
+                                    {course.whoEnroll.map((item, index) => (
+                                        item && (
+                                            <li key={index} className="flex items-center gap-3 text-slate-600">
+                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                                {item}
+                                            </li>
+                                        )
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white text-center">
                             <h3 className="text-xl font-bold mb-2">Ready to Start?</h3>

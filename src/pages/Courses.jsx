@@ -1,10 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { coursesData } from '../data/courses';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
+import { Loader2 } from 'lucide-react';
 
 const Courses = () => {
-    // In future we can merge this with Firebase data if needed
-    const [courses, setCourses] = useState(coursesData);
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
+                const snapshot = await getDocs(q);
+                const courseData = snapshot.docs.map(doc => ({
+                    ...doc.data(),
+                    id: doc.id
+                }));
+                setCourses(courseData);
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    }
 
     return (
         <div className="min-h-screen py-12">

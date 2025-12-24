@@ -1,7 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Search, Loader2, X, Upload, BookOpen } from 'lucide-react';
+import { Plus, Trash2, Edit2, Search, Loader2, X, Upload, BookOpen, PlusCircle, MinusCircle } from 'lucide-react';
 import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
+
+// Helper Component for List Inputs
+const ListInput = ({ label, items = [], onChange, placeholder }) => {
+    const handleAdd = () => {
+        onChange([...items, '']);
+    };
+
+    const handleRemove = (index) => {
+        const newItems = items.filter((_, i) => i !== index);
+        onChange(newItems);
+    };
+
+    const handleChange = (index, value) => {
+        const newItems = [...items];
+        newItems[index] = value;
+        onChange(newItems);
+    };
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
+            <div className="space-y-2">
+                {items.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                        <input
+                            type="text"
+                            value={item}
+                            onChange={(e) => handleChange(index, e.target.value)}
+                            placeholder={placeholder}
+                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => handleRemove(index)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                ))}
+                <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:text-blue-700 px-2 py-1"
+                >
+                    <PlusCircle size={16} /> Add Item
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const AdminCourses = () => {
     const [courses, setCourses] = useState([]);
@@ -15,7 +66,13 @@ const AdminCourses = () => {
     const initialFormState = {
         title: '',
         category: 'Technology',
-        description: '',
+        description: '', // Short description
+        fullDescription: '',
+        whyChoose: '',
+        objective: '',
+        whyUs: [''],
+        whatLearn: [''],
+        whoEnroll: [''],
         duration: '',
         fees: '',
         image: ''
@@ -28,8 +85,8 @@ const AdminCourses = () => {
         const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const courseData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                id: doc.id
             }));
             setCourses(courseData);
             setLoading(false);
@@ -87,12 +144,18 @@ const AdminCourses = () => {
         if (course) {
             setEditingCourse(course);
             setFormData({
-                title: course.title,
-                category: course.category,
-                description: course.description,
+                title: course.title || '',
+                category: course.category || 'Technology',
+                description: course.description || '', // Short
+                fullDescription: course.fullDescription || '',
+                whyChoose: course.whyChoose || '',
+                objective: course.objective || '',
+                whyUs: course.whyUs || [''],
+                whatLearn: course.whatLearn || [''],
+                whoEnroll: course.whoEnroll || [''],
                 duration: course.duration || '',
                 fees: course.fees || '',
-                image: course.image
+                image: course.image || ''
             });
             setPreviewUrl(course.image);
         } else {
@@ -318,57 +381,115 @@ const AdminCourses = () => {
                                             required
                                         />
                                     </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                                            <select
+                                                value={formData.category}
+                                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                            >
+                                                <option>Technology</option>
+                                                <option>Accounting & Finance</option>
+                                                <option>Communication Skills</option>
+                                                <option>Design</option>
+                                                <option>Marketing</option>
+                                                <option>Business</option>
+                                                <option>Other</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Duration</label>
+                                            <input
+                                                type="text"
+                                                value={formData.duration}
+                                                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                                placeholder="e.g. 3 Months"
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                            />
+                                        </div>
+                                    </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                                        <select
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                                        >
-                                            <option>Technology</option>
-                                            <option>Design</option>
-                                            <option>Marketing</option>
-                                            <option>Business</option>
-                                            <option>Data</option>
-                                            <option>Arts</option>
-                                            <option>Other</option>
-                                        </select>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Fees (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.fees}
+                                            onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
+                                            placeholder="e.g. ₹5000"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
                                     </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                                <textarea
-                                    rows="4"
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Course details, learning outcomes..."
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                                    required
-                                ></textarea>
-                            </div>
-
-                            <div className="flex gap-4">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Duration (Optional)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.duration}
-                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                        placeholder="e.g. 3 Months"
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Short Description (Card View)</label>
+                                    <textarea
+                                        rows="2"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        placeholder="Brief summary for the course card..."
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                                        required
+                                    ></textarea>
                                 </div>
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Fees (Optional)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.fees}
-                                        onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
-                                        placeholder="e.g. ₹5000"
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Full Description (Detail Page)</label>
+                                    <textarea
+                                        rows="4"
+                                        value={formData.fullDescription}
+                                        onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
+                                        placeholder="Detailed course introduction..."
                                         className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Objective</label>
+                                        <textarea
+                                            rows="3"
+                                            value={formData.objective}
+                                            onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
+                                            placeholder="Course objective..."
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                        ></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Why Choose This Course?</label>
+                                        <textarea
+                                            rows="3"
+                                            value={formData.whyChoose}
+                                            onChange={(e) => setFormData({ ...formData, whyChoose: e.target.value })}
+                                            placeholder="Why should students pick this?"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl">
+                                    <ListInput
+                                        label="What Will You Learn? (Syllabus)"
+                                        items={formData.whatLearn}
+                                        onChange={(newItems) => setFormData({ ...formData, whatLearn: newItems })}
+                                        placeholder="e.g. Basic Computer Concepts"
                                     />
+                                    <ListInput
+                                        label="Why Us? (Benefits)"
+                                        items={formData.whyUs}
+                                        onChange={(newItems) => setFormData({ ...formData, whyUs: newItems })}
+                                        placeholder="e.g. Experienced Faculty"
+                                    />
+                                    <div className="md:col-span-2">
+                                        <ListInput
+                                            label="Who Should Enroll? (Target Audience)"
+                                            items={formData.whoEnroll}
+                                            onChange={(newItems) => setFormData({ ...formData, whoEnroll: newItems })}
+                                            placeholder="e.g. Students, Professionals"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
