@@ -417,7 +417,7 @@ const Home = () => {
                         Take a glimpse into the vibrant life at SkillNest. Our gallery showcases events, classrooms, and student activities.
                     </p>
                     {/* Desktop: 3D Gallery */}
-                    <div className="hidden md:block relative h-[300px] -mt-8 -mb-28">
+                    <div className="hidden md:block relative h-[300px] -mt-8 -mb-72">
                         {galleryItems.length > 0 && (
                             <CircularGallery
                                 items={galleryItems}
