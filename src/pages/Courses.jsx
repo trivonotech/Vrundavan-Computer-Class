@@ -28,9 +28,9 @@ const Courses = () => {
         fetchCourses();
     }, []);
 
-    if (loading) {
-        return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
-    }
+    // if (loading) {
+    //     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    // }
 
     return (
         <div className="min-h-screen py-12">
@@ -41,37 +41,56 @@ const Courses = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {courses.map((course) => (
-                        <div key={course.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full group">
-                            <div className="relative overflow-hidden h-48">
-                                <img
-                                    src={course.image}
-                                    alt={course.title}
-                                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
-                            </div>
-                            <div className="p-6 flex-1 flex flex-col">
-                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit mb-3">
-                                    {course.category}
-                                </span>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                                    {course.title}
-                                </h3>
-                                <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
-                                    {course.fullDescription || course.description || course.shortDescription}
-                                </p>
-                                <div className="mt-auto">
-                                    <Link
-                                        to={`/courses/${course.id}`}
-                                        className="w-full block text-center py-2.5 border border-blue-600 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white font-medium transition-all duration-300"
-                                    >
-                                        Learn More
-                                    </Link>
+                    {loading ? (
+                        // Skeleton Loaders
+                        Array(6).fill(0).map((_, index) => (
+                            <div key={index} className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full overflow-hidden animate-pulse">
+                                <div className="h-48 bg-slate-200"></div>
+                                <div className="p-6 flex-1 space-y-4">
+                                    <div className="h-6 w-24 bg-slate-200 rounded-full"></div>
+                                    <div className="h-8 w-3/4 bg-slate-200 rounded"></div>
+                                    <div className="space-y-2">
+                                        <div className="h-4 w-full bg-slate-200 rounded"></div>
+                                        <div className="h-4 w-5/6 bg-slate-200 rounded"></div>
+                                        <div className="h-4 w-4/6 bg-slate-200 rounded"></div>
+                                    </div>
+                                    <div className="h-10 w-full bg-slate-200 rounded-xl mt-auto"></div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        courses.map((course) => (
+                            <div key={course.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full group">
+                                <div className="relative overflow-hidden h-48">
+                                    <img
+                                        src={course.image}
+                                        alt={course.title}
+                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                                </div>
+                                <div className="p-6 flex-1 flex flex-col">
+                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit mb-3">
+                                        {course.category}
+                                    </span>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                        {course.title}
+                                    </h3>
+                                    <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
+                                        {course.fullDescription || course.description || course.shortDescription}
+                                    </p>
+                                    <div className="mt-auto">
+                                        <Link
+                                            to={`/courses/${course.id}`}
+                                            className="w-full block text-center py-2.5 border border-blue-600 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white font-medium transition-all duration-300"
+                                        >
+                                            Learn More
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

@@ -72,39 +72,44 @@ const Gallery = () => {
     return (
         <div className="min-h-screen py-6 md:py-12">
             <div className="max-w-screen-xl mx-auto px-4">
-                {loading ? (
+                {/* {loading ? (
                     <div className="flex items-center justify-center min-h-[50vh]">
                         <Loader2 className="animate-spin text-blue-600" size={40} />
                     </div>
-                ) : (
-                    <>
-                        {/* Header */}
-                        <div className="text-center mb-8 md:mb-12 space-y-4">
-                            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Campus Gallery</h1>
-                            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                                A visual journey through our campus, vibrant events, and student life. Experience the spirit of SkillNest.
-                            </p>
-                        </div>
+                ) : ( */}
+                <>
+                    {/* Header */}
+                    <div className="text-center mb-8 md:mb-12 space-y-4">
+                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Campus Gallery</h1>
+                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                            A visual journey through our campus, vibrant events, and student life. Experience the spirit of SkillNest.
+                        </p>
+                    </div>
 
-                        {/* Filters */}
-                        <div className="flex flex-wrap justify-center gap-3 mb-8 md:mb-12">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${activeCategory === cat
-                                        ? 'bg-blue-600 text-white shadow-lg scale-105'
-                                        : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-blue-600 shadow-sm'
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
+                    {/* Filters */}
+                    <div className="flex flex-wrap justify-center gap-3 mb-8 md:mb-12">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${activeCategory === cat
+                                    ? 'bg-blue-600 text-white shadow-lg scale-105'
+                                    : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-blue-600 shadow-sm'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
 
-                        {/* Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                            {filteredImages.map((image) => (
+                    {/* Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                        {loading ? (
+                            Array(8).fill(0).map((_, index) => (
+                                <div key={index} className="aspect-square bg-slate-200 rounded-2xl animate-pulse"></div>
+                            ))
+                        ) : (
+                            filteredImages.map((image) => (
                                 <div
                                     key={image.id}
                                     onClick={() => openLightbox(image)}
@@ -121,50 +126,51 @@ const Gallery = () => {
                                         <p className="text-white font-medium text-sm truncate">{image.category}</p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            ))
+                        )}
+                    </div>
 
-                        {/* Lightbox */}
-                        {selectedImage && (
-                            <div
-                                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm animate-fade-in"
+                    {/* Lightbox */}
+                    {selectedImage && (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm animate-fade-in"
+                            onClick={closeLightbox}
+                        >
+                            <button
+                                className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
                                 onClick={closeLightbox}
                             >
-                                <button
-                                    className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
-                                    onClick={closeLightbox}
-                                >
-                                    <X size={40} />
-                                </button>
+                                <X size={40} />
+                            </button>
 
-                                <button
-                                    className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm z-10"
-                                    onClick={handlePrev}
-                                >
-                                    <ChevronLeft size={32} className="md:w-12 md:h-12" />
-                                </button>
+                            <button
+                                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm z-10"
+                                onClick={handlePrev}
+                            >
+                                <ChevronLeft size={32} className="md:w-12 md:h-12" />
+                            </button>
 
-                                <div className="relative max-w-5xl max-h-[85vh] w-full" onClick={e => e.stopPropagation()}>
-                                    <img
-                                        src={selectedImage.src}
-                                        alt={selectedImage.category}
-                                        className="w-full h-full object-contain rounded-lg shadow-2xl"
-                                    />
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white rounded-b-lg">
-                                        <p className="text-gray-300">{selectedImage.category}</p>
-                                    </div>
+                            <div className="relative max-w-5xl max-h-[85vh] w-full" onClick={e => e.stopPropagation()}>
+                                <img
+                                    src={selectedImage.src}
+                                    alt={selectedImage.category}
+                                    className="w-full h-full object-contain rounded-lg shadow-2xl"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white rounded-b-lg">
+                                    <p className="text-gray-300">{selectedImage.category}</p>
                                 </div>
-
-                                <button
-                                    className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm z-10"
-                                    onClick={handleNext}
-                                >
-                                    <ChevronRight size={32} className="md:w-12 md:h-12" />
-                                </button>
                             </div>
-                        )}
-                    </>
-                )}
+
+                            <button
+                                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-sm z-10"
+                                onClick={handleNext}
+                            >
+                                <ChevronRight size={32} className="md:w-12 md:h-12" />
+                            </button>
+                        </div>
+                    )}
+                </>
+                {/* )} */}
             </div>
         </div>
     );

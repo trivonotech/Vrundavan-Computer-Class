@@ -43,7 +43,7 @@ const TeamManagement = () => {
         fetchData();
     }, []);
 
-    if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    // if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
 
     return (
         <div className="min-h-screen py-12">
@@ -57,16 +57,29 @@ const TeamManagement = () => {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
-                        {leaders.map((leader) => (
-                            <div key={leader.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
-                                <img src={leader.image} alt={leader.name} className="w-full h-40 md:h-64 object-cover" />
-                                <div className="p-3 md:p-6 text-center">
-                                    <h3 className="text-sm md:text-lg font-bold text-slate-900">{leader.name}</h3>
-                                    <p className="text-blue-600 text-xs md:text-sm font-medium">{leader.role}</p>
-                                    <p className="text-slate-500 text-[10px] md:text-sm mt-1 md:mt-2 line-clamp-2">{leader.bio}</p>
+                        {loading ? (
+                            Array(3).fill(0).map((_, index) => (
+                                <div key={index} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 animate-pulse">
+                                    <div className="w-full h-40 md:h-64 bg-slate-200"></div>
+                                    <div className="p-3 md:p-6 text-center space-y-2">
+                                        <div className="h-5 w-3/4 mx-auto bg-slate-200 rounded"></div>
+                                        <div className="h-3 w-1/2 mx-auto bg-slate-200 rounded"></div>
+                                        <div className="h-3 w-full mx-auto bg-slate-200 rounded mt-2"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            leaders.map((leader) => (
+                                <div key={leader.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
+                                    <img src={leader.image} alt={leader.name} className="w-full h-40 md:h-64 object-cover" />
+                                    <div className="p-3 md:p-6 text-center">
+                                        <h3 className="text-sm md:text-lg font-bold text-slate-900">{leader.name}</h3>
+                                        <p className="text-blue-600 text-xs md:text-sm font-medium">{leader.role}</p>
+                                        <p className="text-slate-500 text-[10px] md:text-sm mt-1 md:mt-2 line-clamp-2">{leader.bio}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 
@@ -78,16 +91,29 @@ const TeamManagement = () => {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
-                        {teamMembers.map((member) => (
-                            <div key={member.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
-                                <img src={member.image} alt={member.name} className="w-full h-40 md:h-64 object-cover" />
-                                <div className="p-3 md:p-6 text-center">
-                                    <h3 className="text-sm md:text-lg font-bold text-slate-900">{member.name}</h3>
-                                    <p className="text-blue-600 text-xs md:text-sm font-medium">{member.role}</p>
-                                    <p className="text-slate-500 text-[10px] md:text-sm mt-1 md:mt-2">{member.subject}</p>
+                        {loading ? (
+                            Array(4).fill(0).map((_, index) => (
+                                <div key={index} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 animate-pulse">
+                                    <div className="w-full h-40 md:h-64 bg-slate-200"></div>
+                                    <div className="p-3 md:p-6 text-center space-y-2">
+                                        <div className="h-5 w-3/4 mx-auto bg-slate-200 rounded"></div>
+                                        <div className="h-3 w-1/2 mx-auto bg-slate-200 rounded"></div>
+                                        <div className="h-3 w-full mx-auto bg-slate-200 rounded mt-2"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            teamMembers.map((member) => (
+                                <div key={member.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 animate-fade-in">
+                                    <img src={member.image} alt={member.name} className="w-full h-40 md:h-64 object-cover" />
+                                    <div className="p-3 md:p-6 text-center">
+                                        <h3 className="text-sm md:text-lg font-bold text-slate-900">{member.name}</h3>
+                                        <p className="text-blue-600 text-xs md:text-sm font-medium">{member.role}</p>
+                                        <p className="text-slate-500 text-[10px] md:text-sm mt-1 md:mt-2">{member.subject}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 
