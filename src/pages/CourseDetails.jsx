@@ -32,9 +32,7 @@ const CourseDetails = () => {
         fetchCourse();
     }, [courseId]);
 
-    // if (loading) {
-    //     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
-    // }
+
 
     if (!loading && !course) {
         return (
@@ -71,7 +69,7 @@ const CourseDetails = () => {
                                     <div className="h-4 w-full bg-slate-200 rounded"></div>
                                     <div className="h-4 w-2/3 bg-slate-200 rounded"></div>
                                 </div>
-                                <div className="h-32 bg-slate-200 rounded-xl"></div>
+                                <div className="h-32 w-full bg-slate-200 rounded-xl"></div>
                             </div>
                         ) : (
                             <div>
@@ -110,7 +108,7 @@ const CourseDetails = () => {
 
                         {loading ? (
                             // Hero Image Skeleton
-                            <div className="aspect-video bg-slate-200 rounded-3xl animate-pulse"></div>
+                            <div className="w-full aspect-video bg-slate-200 rounded-3xl animate-pulse"></div>
                         ) : (
                             <div className="relative group rounded-3xl overflow-hidden shadow-2xl shadow-blue-100">
                                 <div className="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors duration-300"></div>
@@ -129,72 +127,58 @@ const CourseDetails = () => {
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="md:col-span-2 space-y-12">
-
-                        {/* Why Choose */}
                         {loading ? (
-                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm animate-pulse space-y-4">
-                                <div className="h-8 w-1/2 bg-slate-200 rounded"></div>
-                                <div className="space-y-2">
-                                    <div className="h-4 w-full bg-slate-200 rounded"></div>
-                                    <div className="h-4 w-full bg-slate-200 rounded"></div>
-                                    <div className="h-4 w-3/4 bg-slate-200 rounded"></div>
-                                </div>
+                            // Main Content Skeletons
+                            <div className="space-y-12 animate-pulse">
+                                <div className="h-48 bg-slate-200 rounded-2xl"></div>
+                                <div className="h-64 bg-slate-200 rounded-2xl"></div>
                             </div>
                         ) : (
-                            <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                                <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                                    <Award className="text-blue-600" />
-                                    Why Choose This Course?
-                                </h2>
-                                <p className="text-slate-600 leading-relaxed">
-                                    {course.whyChoose}
-                                </p>
-                            </section>
-                        )}
-
-                        {/* What You Will Learn */}
-                        {loading ? (
-                            <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm animate-pulse space-y-4">
-                                <div className="h-8 w-1/2 bg-slate-200 rounded"></div>
-                                <div className="grid sm:grid-cols-2 gap-3">
-                                    <div className="h-10 bg-slate-200 rounded"></div>
-                                    <div className="h-10 bg-slate-200 rounded"></div>
-                                    <div className="h-10 bg-slate-200 rounded"></div>
-                                    <div className="h-10 bg-slate-200 rounded"></div>
-                                </div>
-                            </div>
-                        ) : (
-                            course.whatLearn && course.whatLearn.length > 0 && (
-                                <section className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
+                            <>
+                                {/* Why Choose */}
+                                <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                                     <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                                        <BookOpen className="text-blue-600" />
-                                        What Will You Learn?
+                                        <Award className="text-blue-600" />
+                                        Why Choose This Course?
                                     </h2>
-                                    <div className="grid sm:grid-cols-2 gap-3">
-                                        {course.whatLearn.map((item, index) => (
-                                            item && (
-                                                <div key={index} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
-                                                    <div className="mt-1 min-w-[20px]">
-                                                        <CheckCircle2 size={20} className="text-green-500" />
-                                                    </div>
-                                                    <span className="text-slate-700 font-medium">{item}</span>
-                                                </div>
-                                            )
-                                        ))}
-                                    </div>
+                                    <p className="text-slate-600 leading-relaxed">
+                                        {course.whyChoose}
+                                    </p>
                                 </section>
-                            )
-                        )}
 
+                                {/* What You Will Learn */}
+                                {course.whatLearn && course.whatLearn.length > 0 && (
+                                    <section className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
+                                        <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                                            <BookOpen className="text-blue-600" />
+                                            What Will You Learn?
+                                        </h2>
+                                        <div className="grid sm:grid-cols-2 gap-3">
+                                            {course.whatLearn.map((item, index) => (
+                                                item && (
+                                                    <div key={index} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+                                                        <div className="mt-1 min-w-[20px]">
+                                                            <CheckCircle2 size={20} className="text-green-500" />
+                                                        </div>
+                                                        <span className="text-slate-700 font-medium">{item}</span>
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     {/* Sidebar */}
                     <div className="space-y-8">
                         {loading ? (
-                            <>
-                                <div className="bg-slate-200 rounded-2xl h-64 animate-pulse"></div>
-                                <div className="bg-slate-200 rounded-2xl h-48 animate-pulse"></div>
-                            </>
+                            // Sidebar Skeletons
+                            <div className="space-y-8 animate-pulse">
+                                <div className="h-64 bg-slate-800 rounded-2xl opacity-10"></div>
+                                <div className="h-48 bg-slate-200 rounded-2xl"></div>
+                            </div>
                         ) : (
                             <>
                                 {/* Why Vrundavan */}
@@ -233,16 +217,16 @@ const CourseDetails = () => {
                                         </ul>
                                     </div>
                                 )}
+
+                                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white text-center">
+                                    <h3 className="text-xl font-bold mb-2">Ready to Start?</h3>
+                                    <p className="mb-6 opacity-90 text-sm">Join us today and boost your career with practical skills.</p>
+                                    <Link to="/contact" className="inline-block w-full bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                                        Enquire Now
+                                    </Link>
+                                </div>
                             </>
                         )}
-
-                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white text-center">
-                            <h3 className="text-xl font-bold mb-2">Ready to Start?</h3>
-                            <p className="mb-6 opacity-90 text-sm">Join us today and boost your career with practical skills.</p>
-                            <Link to="/contact" className="inline-block w-full bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                                Enquire Now
-                            </Link>
-                        </div>
                     </div>
                 </div>
             </div>
