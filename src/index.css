@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html, body {
+    background-color: #f8fafc; /* slate-50 */
+  }
+}
+
 @layer utilities {
   .animate-float-slow {
     animation: float-background 20s ease-in-out infinite;
