@@ -81,6 +81,39 @@ const Home = () => {
         courses: '25+'
     });
 
+    const [hp, setHp] = useState({
+        hero: {
+            badge: 'Transforming Skills Into Success',
+            heading: 'THE LEADING COMPUTER INSTITUTE IN KESHOD.',
+            subheading: 'Join a new era of education where innovation meets knowledge. Discover expert-led courses, practical skills, and limitless opportunities to achieve your goals.',
+            sinceText: 'SINCE 2004, VRUNDAVAN COMPUTERS IS WORKING AS COMPUTERS INSTITUTE IN KESHOD AND PROVIDE BEST KNOWLEDGE IN SOCIETY',
+        },
+        management: {
+            heading: 'Meet Our Management',
+            description: 'Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind SkillNest.',
+            image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        },
+        missionVision: {
+            mission: 'The mission of our institute is to provide all students with a high quality education that enables them to be contributing members of a multiethnic, multicultural, pluralistic society. We seek to create an environment that achieves equity for all students and ensure that each student is a successful learner, is fully respected, and learns to respect others.',
+            vision: 'We are a forward-thinking institute aiming to prepare our students for a rapidly changing world by equipping them with critical thinking skills, global perspective, and respect for core values of honesty, integrity, loyalty, and compassion.',
+        },
+        director: {
+            name: 'Dr. Robert Fox',
+            title: 'Director',
+            image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            message: 'Dear students,\n\nCongratulations on joining the VRUNDAVAN COMPUTERS FAMILY. On behalf of the institute, I welcome you to Vrundavan Computers, a place where we celebrate youth and excellence and attempt to transform young persons into adults with a sense of social responsibility, human values and concern for environment.\n\nWe not only strive to train the students to become excellent scientists, technologists, thinkers and leaders of the society, but also help them mould themselves into better human beings.',
+        },
+        team: {
+            heading: 'Our Expert Team',
+            description: 'Our faculty comprises industry experts and passionate educators committed to your success. Get to know the people who will guide your journey.',
+            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        },
+        contact: {
+            heading: 'Get in Touch',
+            description: "Have questions? We're here to help! Reach out to us for admissions, course details, or any other inquiries.",
+        },
+    });
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -94,6 +127,20 @@ const Home = () => {
             }
         };
         fetchStats();
+    }, []);
+
+    useEffect(() => {
+        const fetchHomepage = async () => {
+            try {
+                const snap = await getDoc(doc(db, "settings", "homepage"));
+                if (snap.exists()) {
+                    setHp(prev => ({ ...prev, ...snap.data() }));
+                }
+            } catch (error) {
+                console.error("Error fetching homepage settings:", error);
+            }
+        };
+        fetchHomepage();
     }, []);
 
     const [galleryItems, setGalleryItems] = useState([]);
@@ -145,13 +192,13 @@ const Home = () => {
                 <div className="max-w-screen-xl mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-12 items-center h-full">
                     <div className="text-white space-y-8 pb-12 md:pb-0">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium">
-                            <span>🎓</span> Transforming Skills Into Success
+                            <span>🎓</span> {hp.hero.badge}
                         </div>
                         <h1 className="text-3xl md:text-6xl font-bold leading-tight">
-                            <span className="text-xl md:text-4xl text-yellow-300">THE</span> LEADING&nbsp;COMPUTER <br /> INSTITUTE IN KESHOD.
+                            {hp.hero.heading}
                         </h1>
                         <p className="text-lg text-blue-100 max-w-lg">
-                            Join a new era of education where innovation meets knowledge. Discover expert-led courses, practical skills, and limitless opportunities to achieve your goals.
+                            {hp.hero.subheading}
                         </p>
 
                         <div className="flex flex-wrap gap-4 mt-8">
@@ -165,7 +212,7 @@ const Home = () => {
 
                         <div className="p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl max-w-lg mt-8">
                             <p className="text-blue-50 font-medium text-sm leading-relaxed">
-                                <span className="text-yellow-300 font-bold">SINCE 2004</span>, VRUNDAVAN COMPUTERS IS WORKING AS COMPUTERS INSTITUTE IN KESHOD AND PROVIDE BEST KNOWLEDGE IN SOCIETY
+                                {hp.hero.sinceText}
                             </p>
                         </div>
                     </div>
@@ -268,17 +315,15 @@ const Home = () => {
                 <section className="grid md:grid-cols-2 gap-12 items-center bg-white/90 rounded-3xl p-8 md:p-12 shadow-sm">
                     <div className="space-y-6">
                         <div className="inline-block p-3 rounded-xl bg-purple-100 text-purple-600"><Briefcase size={24} /></div>
-                        <h2 className="text-3xl font-bold text-slate-900">Meet Our Management</h2>
-                        <p className="text-slate-600">
-                            Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind SkillNest.
-                        </p>
+                        <h2 className="text-3xl font-bold text-slate-900">{hp.management.heading}</h2>
+                        <p className="text-slate-600">{hp.management.description}</p>
                         <Link to="/team-management" className="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700">
                             Meet the Leaders <ArrowRight size={20} className="ml-2" />
                         </Link>
                     </div>
                     <div>
                         <img
-                            src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            src={hp.management.image}
                             alt="Management"
                             className="rounded-2xl shadow-lg"
                             loading="lazy"
@@ -329,9 +374,7 @@ const Home = () => {
                                 </div>
                                 <h2 className="text-2xl font-bold text-slate-900">Our Mission</h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed">
-                                The mission of our institute is to provide all students with a high quality education that enables them to be contributing members of a multiethnic, multicultural, pluralistic society. We seek to create an environment that achieves equity for all students and ensure that each student is a successful learner, is fully respected, and learns to respect others.
-                            </p>
+                            <p className="text-slate-600 leading-relaxed">{hp.missionVision.mission}</p>
                         </div>
                     </div>
 
@@ -344,9 +387,7 @@ const Home = () => {
                                 </div>
                                 <h2 className="text-2xl font-bold text-slate-900">Our Vision</h2>
                             </div>
-                            <p className="text-slate-600 leading-relaxed">
-                                We are a forward-thinking institute aiming to prepare our students for a rapidly changing world by equipping them with critical thinking skills, global perspective, and respect for core values of honesty, integrity, loyalty, and compassion.
-                            </p>
+                            <p className="text-slate-600 leading-relaxed">{hp.missionVision.vision}</p>
                         </div>
                     </div>
                 </section>
@@ -364,15 +405,15 @@ const Home = () => {
                             <div className="flex flex-col items-center md:items-start shrink-0">
                                 <div className="w-48 h-56 md:w-56 md:h-64 rounded-2xl border-4 border-white shadow-lg overflow-hidden mb-4 relative z-10 ring-1 ring-slate-100">
                                     <img
-                                        src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                                        src={hp.director.image}
                                         alt="Director"
                                         className="w-full h-full object-cover"
                                         loading="lazy"
                                     />
                                 </div>
                                 <div className="text-center md:text-center w-full">
-                                    <h3 className="text-xl font-bold text-slate-900">Dr. Robert Fox</h3>
-                                    <p className="text-blue-600 font-medium text-sm">Director</p>
+                                    <h3 className="text-xl font-bold text-slate-900">{hp.director.name}</h3>
+                                    <p className="text-blue-600 font-medium text-sm">{hp.director.title}</p>
                                 </div>
                             </div>
 
@@ -386,21 +427,13 @@ const Home = () => {
                                     <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Welcoming Future Leaders</h2>
                                 </div>
 
-                                <div className="space-y-3 text-slate-600 leading-relaxed text-lg font-serif">
-                                    <p>
-                                        Dear students,
-                                    </p>
-                                    <p>
-                                        Congratulations on joining the <span className="text-blue-700 font-semibold bg-blue-50 px-1 rounded">VRUNDAVAN COMPUTERS FAMILY</span>. On behalf of the institute, I welcome you to Vrundavan Computers, a place where we celebrate youth and excellence and attempt to transform young persons into adults with a sense of social responsibility, human values and concern for environment.
-                                    </p>
-                                    <p>
-                                        We not only strive to train the students to become excellent scientists, technologists, thinkers and leaders of the society, but also help them mould themselves into better human beings.
-                                    </p>
+                                <div className="space-y-3 text-slate-600 leading-relaxed text-lg font-serif whitespace-pre-line">
+                                    {hp.director.message}
                                 </div>
 
                                 <div className="pt-2 flex items-center gap-4">
                                     <div className="h-px flex-1 bg-slate-100"></div>
-                                    <p className="font-dancing text-2xl text-slate-400 select-none transform -rotate-2">Robert Fox</p>
+                                    <p className="font-dancing text-2xl text-slate-400 select-none transform -rotate-2">{hp.director.name}</p>
                                 </div>
                             </div>
                         </div>
@@ -475,7 +508,7 @@ const Home = () => {
                 <section className="grid md:grid-cols-2 gap-12 items-center bg-white/90 rounded-3xl p-8 md:p-12 shadow-sm">
                     <div className="order-2 md:order-1">
                         <img
-                            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            src={hp.team.image}
                             alt="Team"
                             className="rounded-2xl shadow-lg"
                             loading="lazy"
@@ -483,10 +516,8 @@ const Home = () => {
                     </div>
                     <div className="order-1 md:order-2 space-y-6">
                         <div className="inline-block p-3 rounded-xl bg-green-100 text-green-600"><Users size={24} /></div>
-                        <h2 className="text-3xl font-bold text-slate-900">Our Expert Team</h2>
-                        <p className="text-slate-600">
-                            Our faculty comprises industry experts and passionate educators committed to your success. Get to know the people who will guide your journey.
-                        </p>
+                        <h2 className="text-3xl font-bold text-slate-900">{hp.team.heading}</h2>
+                        <p className="text-slate-600">{hp.team.description}</p>
                         <Link to="/team-management" className="inline-flex items-center text-green-600 font-semibold hover:text-green-700">
                             See All Members <ArrowRight size={20} className="ml-2" />
                         </Link>
@@ -497,11 +528,9 @@ const Home = () => {
                 <section className="text-center space-y-8 bg-blue-50/60 backdrop-blur-sm rounded-3xl p-12">
                     <div className="flex items-center justify-center gap-3">
                         <div className="p-3 rounded-xl bg-blue-100 text-blue-600"><Phone size={24} /></div>
-                        <h2 className="text-3xl font-bold text-slate-900">Get in Touch</h2>
+                        <h2 className="text-3xl font-bold text-slate-900">{hp.contact.heading}</h2>
                     </div>
-                    <p className="text-slate-600 max-w-2xl mx-auto">
-                        Have questions? We're here to help! Reach out to us for admissions, course details, or any other inquiries.
-                    </p>
+                    <p className="text-slate-600 max-w-2xl mx-auto">{hp.contact.description}</p>
                     <Link to="/contact" className="inline-block bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-full font-medium transition-colors">
                         Contact Us Now
                     </Link>

@@ -27,6 +27,9 @@ const AdminStats = lazy(() => import('./pages/admin/AdminStats'));
 const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'));
 const AdminDiagnostics = lazy(() => import('./pages/admin/AdminDiagnostics'));
 const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
+const AdminHomepage = lazy(() => import('./pages/admin/AdminHomepage'));
+const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
+const AdminFooter = lazy(() => import('./pages/admin/AdminFooter'));
 
 // Loading component
 const PageLoader = () => (
@@ -66,6 +69,9 @@ function App() {
               <Route path="security" element={<AdminSecurity />} />
               <Route path="diagnostics" element={<AdminDiagnostics />} />
               <Route path="enquiries" element={<Enquiries />} />
+              <Route path="homepage" element={<AdminHomepage />} />
+              <Route path="contact" element={<AdminContact />} />
+              <Route path="footer" element={<AdminFooter />} />
               {/* Add placeholders for other admin routes if needed */}
             </Route>
 
