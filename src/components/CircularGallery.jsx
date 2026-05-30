@@ -316,6 +316,9 @@ class App {
         this.addEventListeners();
     }
     createRenderer() {
+        const testCanvas = document.createElement('canvas');
+        const webglSupported = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+        if (!webglSupported) throw new Error('WebGL not supported');
         this.renderer = new Renderer({
             alpha: true,
             antialias: true,
@@ -458,9 +461,14 @@ export default function CircularGallery({
 }) {
     const containerRef = useRef(null);
     useEffect(() => {
-        const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, planeScale, yOffset });
+        let app;
+        try {
+            app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, planeScale, yOffset });
+        } catch (e) {
+            console.warn('CircularGallery: WebGL not available', e);
+        }
         return () => {
-            app.destroy();
+            if (app) app.destroy();
         };
     }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, planeScale, yOffset]);
     return <div className="circular-gallery" ref={containerRef} />;
