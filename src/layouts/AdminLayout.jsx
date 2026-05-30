@@ -67,7 +67,7 @@ const AdminLayout = () => {
         <div className="flex h-screen bg-slate-50">
             {/* Sidebar */}
             <aside
-                className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     } md:translate-x-0`}
             >
                 <div className="flex items-center justify-between p-6 border-b border-slate-800">
@@ -85,7 +85,7 @@ const AdminLayout = () => {
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-2">
+                <nav className="p-4 space-y-2 overflow-y-auto flex-1 scrollbar-hide" style={{ maxHeight: 'calc(100vh - 140px)' }}>
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
@@ -106,7 +106,7 @@ const AdminLayout = () => {
                     })}
                 </nav>
 
-                <div className="absolute bottom-0 w-full p-4 border-t border-slate-800">
+                <div className="w-full p-4 border-t border-slate-800 shrink-0">
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-slate-800 hover:text-red-300 transition-colors"
