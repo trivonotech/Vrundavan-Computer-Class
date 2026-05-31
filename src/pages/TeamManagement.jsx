@@ -1,9 +1,11 @@
 ﻿import React from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Loader2 } from 'lucide-react';
 
 const TeamManagement = () => {
+    usePageTitle('Team & Management');
     const [leaders, setLeaders] = React.useState([]);
     const [teamMembers, setTeamMembers] = React.useState([]);
     const [loading, setLoading] = React.useState(true);

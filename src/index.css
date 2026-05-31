@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-  html, body {
+  html {
+    scroll-behavior: smooth;
     background-color: #f8fafc; /* slate-50 */
+  }
+  body {
+    background-color: #f8fafc;
   }
 }
 

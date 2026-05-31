@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { Mail, Phone, MapPin, Send, Clock, Globe, ChevronDown, ChevronUp, Twitter, Linkedin, Facebook, Loader2 } from 'lucide-react';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -32,6 +33,7 @@ const defaultData = {
 };
 
 const Contact = () => {
+    usePageTitle('Contact Us');
     const [activeLocation, setActiveLocation] = useState(0);
     const [data, setData] = useState(defaultData);
     const [loading, setLoading] = useState(true);
@@ -228,6 +230,7 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const ContactForm = () => {
+    usePageTitle('Contact Us');
     const [formData, setFormData] = useState({ firstName: '', lastName: '', phone: '', email: '', message: '' });
     const [status, setStatus] = useState('idle');
 

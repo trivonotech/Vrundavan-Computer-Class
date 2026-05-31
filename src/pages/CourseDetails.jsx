@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Users, BookOpen, Target, Award, Loader2, Clock, Banknote } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
@@ -9,6 +10,7 @@ const CourseDetails = () => {
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
+    usePageTitle(course ? course.title : 'Course Details');
 
     useEffect(() => {
         const fetchCourse = async () => {

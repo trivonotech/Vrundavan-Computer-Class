@@ -1,5 +1,6 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import Lenis from 'lenis';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import SecurityMonitor from './components/SecurityMonitor';
@@ -38,9 +39,30 @@ const PageLoader = () => (
   </div>
 );
 
+// Lenis smooth scroll — disabled on admin pages
+const SmoothScroll = () => {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    if (isAdmin) return;
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    const raf = (time) => { lenis.raf(time); requestAnimationFrame(raf); };
+    const id = requestAnimationFrame(raf);
+    return () => { cancelAnimationFrame(id); lenis.destroy(); };
+  }, [isAdmin]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
+      <SmoothScroll />
       <SecurityMonitor>
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>

@@ -35,7 +35,13 @@ const Footer = () => {
             <div className="max-w-screen-xl mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
-                        <h3 className="text-2xl font-bold mb-4">VRUNDAVAN</h3>
+                        <Link to="/" className="inline-block mb-4">
+                            <img
+                                src="/assets/logo.png"
+                                alt="Vrundavan Computers Logo"
+                                className="h-16 w-auto object-contain"
+                            />
+                        </Link>
                         <p className="text-slate-400 text-sm">{data.tagline}</p>
                     </div>
                     <div>
@@ -51,9 +57,27 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
                         <ul className="space-y-2 text-slate-400 text-sm">
-                            {data.phone && <li className="flex items-center gap-2"><Phone size={16} />{data.phone}</li>}
-                            {data.email && <li className="flex items-center gap-2"><Mail size={16} />{data.email}</li>}
-                            {data.address && <li className="flex items-center gap-2"><MapPin size={16} />{data.address}</li>}
+                            {data.phone && (
+                                <li>
+                                    <a href={`tel:${data.phone}`} className="flex items-center gap-2 hover:text-blue-400 transition-colors">
+                                        <Phone size={16} />{data.phone}
+                                    </a>
+                                </li>
+                            )}
+                            {data.email && (
+                                <li>
+                                    <a href={`mailto:${data.email}`} className="flex items-center gap-2 hover:text-blue-400 transition-colors">
+                                        <Mail size={16} />{data.email}
+                                    </a>
+                                </li>
+                            )}
+                            {data.address && (
+                                <li>
+                                    <a href="https://maps.google.com/maps?ll=21.297611,70.252083&z=14&t=m&hl=en&gl=IN&mapclient=embed" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-blue-400 transition-colors">
+                                        <MapPin size={16} />{data.address}
+                                    </a>
+                                </li>
+                            )}
                         </ul>
                     </div>
                     <div>

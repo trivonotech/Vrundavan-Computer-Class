@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
@@ -6,6 +7,7 @@ import { collection, getDocs, query, orderBy, limit, doc, getDoc, where } from '
 import { db } from "../firebase";
 
 const Home = () => {
+    usePageTitle('Home');
     const [activeSlide, setActiveSlide] = React.useState(0);
     const scrollRef = React.useRef(null);
 

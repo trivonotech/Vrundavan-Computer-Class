@@ -1,9 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { X, ZoomIn, ChevronLeft, ChevronRight, Filter, Loader2 } from 'lucide-react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const Gallery = () => {
+    usePageTitle('Gallery');
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('All');

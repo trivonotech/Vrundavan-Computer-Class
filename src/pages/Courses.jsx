@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
+import usePageTitle from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Loader2 } from 'lucide-react';
 
 const Courses = () => {
+    usePageTitle('Courses');
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
 
