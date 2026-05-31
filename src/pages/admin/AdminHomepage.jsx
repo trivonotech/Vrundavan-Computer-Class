@@ -1,7 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Home } from 'lucide-react';
+﻿import React, { useState, useEffect, useRef } from 'react';
+import { Save, Loader2, Upload, X } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
+// Compress image to base64 WebP (same as AdminGallery)
+const optimizeImage = (file, maxWidth = 800) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const scale = maxWidth / img.width;
+                const w = img.width > maxWidth ? maxWidth : img.width;
+                const h = img.width > maxWidth ? img.height * scale : img.height;
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/webp', 0.75);
+                if (dataUrl.length > 1000000) reject(new Error('Image too large. Please choose a smaller image.'));
+                else resolve(dataUrl);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
+};
+
+// Reusable image upload component
+const ImageUploader = ({ value, onChange, aspectClass = 'h-48', label = 'Image' }) => {
+    const inputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleFile = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        setError('');
+        try {
+            const dataUrl = await optimizeImage(file);
+            onChange(dataUrl);
+        } catch (err) {
+            setError(err.message || 'Upload failed');
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            <label className="block text-sm font-medium text-slate-700">{label}</label>
+            {value && (
+                <div className="relative inline-block">
+                    <img src={value} alt="preview" className={`w-full ${aspectClass} object-cover rounded-xl border border-slate-200`} />
+                    <button type="button" onClick={() => onChange('')}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600">
+                        <X size={12} />
+                    </button>
+                </div>
+            )}
+            <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+            <button type="button" onClick={() => inputRef.current.click()} disabled={uploading}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-slate-300 hover:border-blue-400 text-slate-500 hover:text-blue-600 text-sm transition-colors disabled:opacity-60">
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                {uploading ? 'Uploading...' : value ? 'Change Image' : 'Upload Image'}
+            </button>
+            {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+    );
+};
 
 const defaultData = {
     hero: {
@@ -12,7 +82,7 @@ const defaultData = {
     },
     management: {
         heading: 'Meet Our Management',
-        description: 'Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind SkillNest.',
+        description: 'Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind Vrundavan Computers.',
         image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     missionVision: {
@@ -154,8 +224,12 @@ const AdminHomepage = () => {
                     <h2 className="font-bold text-slate-800">Management Preview Section</h2>
                     <Field label="Heading" name="heading" value={data.management.heading} onChange={e => handleChange('management', e)} />
                     <Field label="Description" name="description" value={data.management.description} onChange={e => handleChange('management', e)} textarea rows={3} />
-                    <Field label="Image URL" name="image" value={data.management.image} onChange={e => handleChange('management', e)} />
-                    {data.management.image && <img src={data.management.image} alt="preview" className="w-full h-48 object-cover rounded-lg mt-2" />}
+                    <ImageUploader
+                        label="Section Image"
+                        value={data.management.image}
+                        onChange={val => setData(prev => ({ ...prev, management: { ...prev.management, image: val } }))}
+                        aspectClass="h-48"
+                    />
                     <SaveBtn onClick={() => handleSave('management')} saving={saving === 'management'} />
                 </div>
             )}
@@ -178,8 +252,12 @@ const AdminHomepage = () => {
                         <Field label="Director Name" name="name" value={data.director.name} onChange={e => handleChange('director', e)} />
                         <Field label="Title / Designation" name="title" value={data.director.title} onChange={e => handleChange('director', e)} />
                     </div>
-                    <Field label="Photo URL" name="image" value={data.director.image} onChange={e => handleChange('director', e)} />
-                    {data.director.image && <img src={data.director.image} alt="preview" className="w-32 h-36 object-cover rounded-xl mt-2" />}
+                    <ImageUploader
+                        label="Director Photo"
+                        value={data.director.image}
+                        onChange={val => setData(prev => ({ ...prev, director: { ...prev.director, image: val } }))}
+                        aspectClass="h-36 w-32"
+                    />
                     <Field label="Message" name="message" value={data.director.message} onChange={e => handleChange('director', e)} textarea rows={8} />
                     <SaveBtn onClick={() => handleSave('director')} saving={saving === 'director'} />
                 </div>
@@ -191,8 +269,12 @@ const AdminHomepage = () => {
                     <h2 className="font-bold text-slate-800">Team Preview Section</h2>
                     <Field label="Heading" name="heading" value={data.team.heading} onChange={e => handleChange('team', e)} />
                     <Field label="Description" name="description" value={data.team.description} onChange={e => handleChange('team', e)} textarea rows={3} />
-                    <Field label="Image URL" name="image" value={data.team.image} onChange={e => handleChange('team', e)} />
-                    {data.team.image && <img src={data.team.image} alt="preview" className="w-full h-48 object-cover rounded-lg mt-2" />}
+                    <ImageUploader
+                        label="Section Image"
+                        value={data.team.image}
+                        onChange={val => setData(prev => ({ ...prev, team: { ...prev.team, image: val } }))}
+                        aspectClass="h-48"
+                    />
                     <SaveBtn onClick={() => handleSave('team')} saving={saving === 'team'} />
                 </div>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, ZoomIn, ChevronLeft, ChevronRight, Filter, Loader2 } from 'lucide-react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -82,7 +82,7 @@ const Gallery = () => {
                     <div className="text-center mb-8 md:mb-12 space-y-4">
                         <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Campus Gallery</h1>
                         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                            A visual journey through our campus, vibrant events, and student life. Experience the spirit of SkillNest.
+                            A visual journey through our campus, vibrant events, and student life. Experience the spirit of Vrundavan Computers.
                         </p>
                     </div>
 

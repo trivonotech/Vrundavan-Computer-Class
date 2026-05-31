@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, BookOpen, Users, Image as ImageIcon, Briefcase, Phone, Clock, Award, LayoutGrid, Laptop, Calculator, Quote } from 'lucide-react';
 import CircularGallery from '../components/CircularGallery';
@@ -84,13 +84,13 @@ const Home = () => {
     const [hp, setHp] = useState({
         hero: {
             badge: 'Transforming Skills Into Success',
-            heading: 'THE LEADING COMPUTER INSTITUTE IN KESHOD.',
+            heading: 'THE LEADING COMPUTER INSTITUTE IN KESHOD.',
             subheading: 'Join a new era of education where innovation meets knowledge. Discover expert-led courses, practical skills, and limitless opportunities to achieve your goals.',
             sinceText: 'SINCE 2004, VRUNDAVAN COMPUTERS IS WORKING AS COMPUTERS INSTITUTE IN KESHOD AND PROVIDE BEST KNOWLEDGE IN SOCIETY',
         },
         management: {
             heading: 'Meet Our Management',
-            description: 'Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind SkillNest.',
+            description: 'Our visionary leaders are dedicated to providing the best educational environment. Learn more about the minds behind Vrundavan Computers.',
             image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
         },
         missionVision: {
@@ -192,7 +192,7 @@ const Home = () => {
                 <div className="max-w-screen-xl mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-12 items-center h-full">
                     <div className="text-white space-y-8 pb-12 md:pb-0">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium">
-                            <span>🎓</span> {hp.hero.badge}
+                            <span>ðŸŽ“</span> {hp.hero.badge}
                         </div>
                         <h1 className="text-3xl md:text-6xl font-bold leading-tight">
                             {hp.hero.heading}
@@ -447,7 +447,7 @@ const Home = () => {
                         <h2 className="text-3xl font-bold">Campus Life Gallery</h2>
                     </div>
                     <p className="text-slate-300 max-w-2xl mx-auto">
-                        Take a glimpse into the vibrant life at SkillNest. Our gallery showcases events, classrooms, and student activities.
+                        Take a glimpse into the vibrant life at Vrundavan Computers. Our gallery showcases events, classrooms, and student activities.
                     </p>
                     {/* Desktop: 3D Gallery */}
                     <div className="hidden md:block relative h-[300px] -mt-8 -mb-72">

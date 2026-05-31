@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Loader2 } from 'lucide-react';
@@ -22,7 +22,7 @@ const TeamManagement = () => {
                 const teamData = teamSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 setLeaders(leadersData.length > 0 ? leadersData : [
-                    { id: 1, name: 'Dr. Robert Fox', role: 'Director', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', bio: 'With over 20 years of experience in education, Dr. Fox leads SkillNest with a vision for innovation.' },
+                    { id: 1, name: 'Dr. Robert Fox', role: 'Director', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', bio: 'With over 20 years of experience in education, Dr. Fox leads Vrundavan Computers with a vision for innovation.' },
                     { id: 2, name: 'Sarah Wilson', role: 'Principal', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', bio: 'Sarah ensures academic excellence and student welfare are always the top priorities.' },
                     { id: 3, name: 'James Anderson', role: 'Head of Operations', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', bio: 'James manages the day-to-day operations, ensuring a smooth learning environment for everyone.' },
                 ]);
